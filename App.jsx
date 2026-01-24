@@ -237,15 +237,17 @@ export default function App() {
   };
 
   const fetchWithRetry = async (url, options, maxRetries = 3) => {
-    let lastError = new Error("Erreur inconnue");
+    let lastError = new Error("Erreur de connexion");
     for (let i = 0; i < maxRetries; i++) {
       try {
         const response = await fetch(url, options);
+        let resText = await response.text();
         let res = null;
+        
         try {
-          res = await response.json();
+          res = JSON.parse(resText);
         } catch (e) {
-          throw new Error(`Réponse non-JSON du serveur (Code ${response.status})`);
+          throw new Error(`Format invalide : ${resText.substring(0, 50)}...`);
         }
         
         if (response.status === 429) { 
@@ -256,11 +258,11 @@ export default function App() {
         }
 
         if (!response.ok) {
-          throw new Error(res?.error?.message || `Erreur Serveur : ${response.status} ${response.statusText}`);
+          throw new Error(res?.error?.message || `Statut ${response.status}`);
         }
 
-        if (!res || !res.candidates || res.candidates.length === 0) {
-          throw new Error("L'IA n'a renvoyé aucun résultat (Safety Filter peut-être ?).");
+        if (!res?.candidates || res.candidates.length === 0) {
+          throw new Error("Aucune réponse générée (Vérifiez les Safety Settings).");
         }
 
         return res;
@@ -284,19 +286,19 @@ export default function App() {
     setRetryCount(0);
     
     const instructions = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    STRUCTURE OBLIGATOIRE :
+    STRUTURE OBLIGATOIRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
-    2. 3 points [POS] et 3 points [AMEL]
+    2. Liste 3 points positifs [POS] et 3 points d'amélioration [AMEL]
     3. Pour chaque collaborateur : [COLLAB_START]Nom[COLLAB_END]
-    CIBLE : 12 BC/jour.`;
+    4. Termine par des conseils de coaching nominatifs.`;
 
-    const fullPrompt = `${instructions}\n\nDonnées à analyser :\n${pastedData}`;
+    const fullPrompt = `${instructions}\n\nDonnées à analyser pour ${periodText} :\n${pastedData}`;
 
-    // MISE À JOUR : Priorité à Gemini 2.0 qui semble être celui qui répond à votre clé
+    // Stratégie de modèles : On privilégie la stabilité v1beta avec les identifiants les plus sûrs
     const attempts = [
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
-      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
-      { ver: 'v1', model: 'gemini-1.5-flash' }
+      { ver: 'v1beta', model: 'gemini-1.0-pro' }
     ];
 
     let success = false;
@@ -308,7 +310,14 @@ export default function App() {
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
         
         const body = { 
-          contents: [{ parts: [{ text: fullPrompt }] }] 
+          contents: [{ parts: [{ text: fullPrompt }] }],
+          // On ajoute des safety settings très permissifs pour éviter les blocages sur les données d'entreprise
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+          ]
         };
 
         const res = await fetchWithRetry(url, {
@@ -330,7 +339,7 @@ export default function App() {
     }
 
     if (!success) {
-      setErrorMsg(`Échec critique. Détails des tentatives :\n${errors.join('\n')}\n\nAstuce : Vérifiez que votre clé est bien une clé Google AI Studio et non GCP.`);
+      setErrorMsg(`Échec de l'Analyse. Détails :\n${errors.join('\n')}\n\nAstuce : Si l'erreur est "not found", assurez-vous que votre clé est une clé "Google AI Studio" et non une clé Google Cloud Platform.`);
     }
     
     setLoading(false);
@@ -393,7 +402,7 @@ export default function App() {
     setIsExporting(true);
     const element = document.getElementById('print-area');
     window.html2pdf().from(element).set({
-      margin: 5, filename: `Audit_Bofrost_${todayDate.replace(/\s/g, '_')}.pdf`,
+      margin: 5, filename: `Audit_Executive_Bofrost_${todayDate.replace(/\s/g, '_')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 1.5, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
@@ -406,7 +415,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.9</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v18.0</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -426,7 +435,7 @@ export default function App() {
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden relative">
         <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden text-left">
-          <div className="flex flex-col"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{periodText}</p></div>
+          <div className="flex flex-col"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic">Audit du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{periodText}</p></div>
           <div className="flex items-center gap-4">
              <button onClick={() => setShowApercu(true)} className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg font-black uppercase text-[9px] hover:bg-indigo-700 transition-all shadow-lg cursor-pointer active:scale-95" disabled={!analysis}><Eye size={14}/> Aperçu PDF</button>
              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-400 shadow-inner"><User size={18}/></div>
@@ -436,7 +445,7 @@ export default function App() {
           {activeTab === 'import' && (
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
               <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
-                <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3></div></div>
+                <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic">Collez votre export Looker Studio ici</p></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 
                 <div className="mt-6 grid grid-cols-2 gap-4">
@@ -450,7 +459,7 @@ export default function App() {
                    </div>
                 </div>
 
-                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[10px] font-mono whitespace-pre-wrap flex items-start gap-3 shadow-sm transition-all animate-in fade-in"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
+                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[10px] font-mono whitespace-pre-wrap flex items-start gap-3 shadow-sm"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
                 
                 <div className="mt-8 flex justify-end">
                   <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3 active:scale-95 cursor-pointer">
@@ -469,7 +478,7 @@ export default function App() {
               </div>
             </div>
           )}
-          {activeTab === 'analyse' && <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-right-12 duration-700 pb-24">{auditContent}</div>}
+          {activeTab === 'analyse' && <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-right-12 duration-700 pb-24 text-left">{auditContent}</div>}
           {activeTab === 'plans' && (
             <div className="max-w-5xl mx-auto space-y-10 pb-24 text-left">
                {collaborators.map(name => (
@@ -487,17 +496,16 @@ export default function App() {
                   <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600 italic tracking-tighter"><Settings size={24}/> Paramètres IA</h3>
                   <div className="space-y-6">
                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[12px] font-bold shadow-sm">
-                        <p className="mb-2 uppercase tracking-wider italic">Guide de connexion :</p>
+                        <p className="mb-2 uppercase tracking-wider italic">Aide à la connexion :</p>
                         <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 hover:underline">
                            1. Créer une clé gratuite sur Google AI Studio <ExternalLink size={14}/>
                         </a>
-                        <p className="mt-1 font-normal opacity-80">2. Cliquez sur "Create API key".</p>
-                        <p className="mt-1 font-normal opacity-80">3. Collez la clé ci-dessous pour activer l'analyse coach.</p>
+                        <p className="mt-1 font-normal opacity-80 italic">Note : Utilisez une clé Google AI Studio et non une clé Google Cloud.</p>
                      </div>
                      <div>
                         <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">Clé API Google Gemini (Format AIza...)</label>
                         <input type="password" value={userApiKey} onChange={(e) => saveApiKey(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-600 outline-none font-mono text-sm shadow-inner" placeholder="Collez votre clé ici..."/>
-                        <p className="mt-2 text-[10px] text-slate-400 italic">Cette clé est stockée uniquement dans votre navigateur (mémoire locale).</p>
+                        <p className="mt-2 text-[10px] text-slate-400 italic">Cette clé est stockée uniquement dans votre navigateur.</p>
                      </div>
                   </div>
                </div>
