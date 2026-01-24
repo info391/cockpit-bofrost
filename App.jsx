@@ -280,9 +280,9 @@ export default function App() {
     const fullPrompt = `${systemPrompt}\n\nVoici les données de performance pour la période ${periodText} :\n${pastedData}`;
 
     try {
-      // FIX ULTIME : Passage à l'endpoint STABLE v1 et fusion du prompt
-      // Cela évite les erreurs "model not found for v1beta" et "unknown field systemInstruction"
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
+      // FIX ULTIME : Utilisation du modèle gemini-2.0-flash-exp (souvent plus accessible sur les nouvelles clés)
+      // On teste d'abord gemini-1.5-flash sur v1beta qui est le standard le plus courant.
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
       
       const options = {
         method: 'POST',
@@ -302,7 +302,30 @@ export default function App() {
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API dans l'onglet Configuration.`);
+      // Tentative de repli sur un autre modèle en cas d'erreur "not found"
+      if (err.message.includes("not found")) {
+        setErrorMsg("Modèle Gemini 1.5 non trouvé. Tentative de repli sur Gemini 2.0...");
+        try {
+          const fallbackUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${userApiKey}`;
+          const options = {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] })
+          };
+          const res = await fetchWithRetry(fallbackUrl, options);
+          const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) {
+            setAnalysis(text);
+            setActiveTab('analyse');
+            setErrorMsg(null);
+            return;
+          }
+        } catch (e) {
+          setErrorMsg(`Erreur critique : ${e.message}. Vérifiez que votre clé API est bien active dans Google AI Studio.`);
+        }
+      } else {
+        setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API dans l'onglet Configuration.`);
+      }
     } finally { setLoading(false); }
   };
 
@@ -376,7 +399,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.1</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.2</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -420,7 +443,7 @@ export default function App() {
                    </div>
                 </div>
 
-                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-3"><AlertCircle size={20}/> {errorMsg}</div>}
+                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-xs font-bold flex items-start gap-3"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
                 
                 <div className="mt-8 flex justify-end">
                   <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">
