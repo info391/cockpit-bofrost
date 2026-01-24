@@ -67,7 +67,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
   if (!data || data.length === 0) return null;
   return (
     <div className="mb-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-md overflow-hidden relative page-collaborator print:mb-0 print:border-none print:shadow-none print:p-0">
-      <div className="bg-slate-50/30 -mx-6 -mt-6 p-4 border-b border-slate-100 mb-4 print:bg-white print:p-1 print:mb-2 text-left">
+      <div className="bg-slate-50/30 -mx-6 -mt-6 p-4 border-b border-slate-100 mb-4 print:bg-white print:p-1 print:mb-2 text-left text-left">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black italic text-lg shadow-lg">
@@ -94,7 +94,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
         <div className="bg-indigo-50/20 rounded-xl p-4 border border-indigo-100/30 relative print:p-2 print:border-none print:bg-white">
           <h5 className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic print:text-[7px]">Diagnostic IA EMconsulting</h5>
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 text-left">
             {analysisItems.map((line, lIdx) => (
               line.type === 'alert' ? (
                 <div key={lIdx} className="p-2 bg-rose-50 rounded-lg text-rose-800 text-[11px] font-bold flex items-center gap-2 border border-rose-100">
@@ -108,13 +108,13 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
             ))}
           </div>
         </div>
-        <div className="bg-emerald-50/30 rounded-xl p-4 border border-emerald-100/40 relative print:p-2 print:border-none print:bg-white">
+        <div className="bg-emerald-50/30 rounded-xl p-4 border border-emerald-100/40 relative print:p-2 print:border-none print:bg-white text-left">
           <h5 className="text-[8px] font-black text-emerald-500 uppercase tracking-widest mb-2 italic print:text-[7px]">Directives Manager & Coaching</h5>
           <div className="p-4 bg-white/5 rounded-lg border border-emerald-100 min-h-[100px] print:p-1 print:border-none">
             {actionPlan ? (
               <p className="text-emerald-950 text-sm font-bold leading-relaxed italic print:text-[11px]">{actionPlan}</p>
             ) : (
-              <p className="text-slate-300 text-xs italic">Aucune directive spécifique.</p>
+              <p className="text-slate-300 text-xs italic">Saisissez des objectifs pour cette période.</p>
             )}
           </div>
         </div>
@@ -247,7 +247,7 @@ export default function App() {
         try {
           res = JSON.parse(resText);
         } catch (e) {
-          throw new Error(`Format invalide : ${resText.substring(0, 50)}...`);
+          throw new Error(`Réponse inattendue (Code ${response.status})`);
         }
         
         if (response.status === 429) { 
@@ -258,11 +258,11 @@ export default function App() {
         }
 
         if (!response.ok) {
-          throw new Error(res?.error?.message || `Statut ${response.status}`);
+          throw new Error(res?.error?.message || `Erreur Serveur : ${response.status}`);
         }
 
         if (!res?.candidates || res.candidates.length === 0) {
-          throw new Error("Aucune réponse générée (Vérifiez les Safety Settings).");
+          throw new Error("Réponse vide du serveur Google.");
         }
 
         return res;
@@ -281,24 +281,31 @@ export default function App() {
       setActiveTab('config');
       return;
     }
+
+    if (!userApiKey.startsWith("AIza")) {
+      setErrorMsg("Format de clé incorrect. Votre clé doit commencer par 'AIza'. Vérifiez sur Google AI Studio.");
+      setActiveTab('config');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg(null);
     setRetryCount(0);
     
     const instructions = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    STRUTURE OBLIGATOIRE :
+    TA STRUCTURE DE RÉPONSE DOIT ÊTRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
-    2. Liste 3 points positifs [POS] et 3 points d'amélioration [AMEL]
-    3. Pour chaque collaborateur : [COLLAB_START]Nom[COLLAB_END]
-    4. Termine par des conseils de coaching nominatifs.`;
+    2. Liste 3 points positifs [POS] et 3 d'amélioration [AMEL]
+    3. Pour chaque collaborateur, utilise EXACTEMENT : [COLLAB_START]Nom[COLLAB_END]
+    CIBLE : 12 BC/jour.`;
 
-    const fullPrompt = `${instructions}\n\nDonnées à analyser pour ${periodText} :\n${pastedData}`;
+    const fullPrompt = `${instructions}\n\nDonnées de performance Bofrost :\n${pastedData}`;
 
-    // Stratégie de modèles : On privilégie la stabilité v1beta avec les identifiants les plus sûrs
+    // Stratégie de modèles : On force le passage par l'endpoint stable v1 avec les noms exacts
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-1.5-flash' },
-      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
-      { ver: 'v1beta', model: 'gemini-1.0-pro' }
+      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1', model: 'gemini-1.5-flash-8b' },
+      { ver: 'v1beta', model: 'gemini-1.5-flash' }
     ];
 
     let success = false;
@@ -310,14 +317,7 @@ export default function App() {
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
         
         const body = { 
-          contents: [{ parts: [{ text: fullPrompt }] }],
-          // On ajoute des safety settings très permissifs pour éviter les blocages sur les données d'entreprise
-          safetySettings: [
-            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-          ]
+          contents: [{ parts: [{ text: fullPrompt }] }] 
         };
 
         const res = await fetchWithRetry(url, {
@@ -334,12 +334,12 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        errors.push(`${config.model} : ${err.message}`);
+        errors.push(`${config.model} (${config.ver}) : ${err.message}`);
       }
     }
 
     if (!success) {
-      setErrorMsg(`Échec de l'Analyse. Détails :\n${errors.join('\n')}\n\nAstuce : Si l'erreur est "not found", assurez-vous que votre clé est une clé "Google AI Studio" et non une clé Google Cloud Platform.`);
+      setErrorMsg(`Échec de l'Analyse. Détails des tentatives :\n${errors.join('\n')}\n\nAstuce : Vérifiez sur Google AI Studio que votre clé n'est pas expirée.`);
     }
     
     setLoading(false);
@@ -387,7 +387,7 @@ export default function App() {
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
                 <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
-                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
              </div>
           </div>
         );
@@ -412,10 +412,10 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-[#F8FAFC] font-sans text-slate-900 overflow-hidden text-sm">
-      <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
+      <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v18.0</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v18.1</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -434,8 +434,8 @@ export default function App() {
         </div>
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden text-left">
-          <div className="flex flex-col"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic">Audit du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{periodText}</p></div>
+        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden text-left text-left">
+          <div className="flex flex-col"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{periodText}</p></div>
           <div className="flex items-center gap-4">
              <button onClick={() => setShowApercu(true)} className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg font-black uppercase text-[9px] hover:bg-indigo-700 transition-all shadow-lg cursor-pointer active:scale-95" disabled={!analysis}><Eye size={14}/> Aperçu PDF</button>
              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-400 shadow-inner"><User size={18}/></div>
@@ -443,9 +443,9 @@ export default function App() {
         </header>
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar print:p-0">
           {activeTab === 'import' && (
-            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
-              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
-                <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic">Collez votre export Looker Studio ici</p></div></div>
+            <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 text-left">
+              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden">
+                <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic uppercase tracking-wider">Copier-coller le tableau Looker Studio ici</p></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 
                 <div className="mt-6 grid grid-cols-2 gap-4">
@@ -466,7 +466,7 @@ export default function App() {
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin" /> 
-                        {retryCount > 0 ? `Retry (${retryCount})...` : "Analyse IA..."}
+                        {retryCount > 0 ? `Retry (${retryCount})...` : "Calcul de l'Audit..."}
                       </>
                     ) : (
                       <>
@@ -483,27 +483,27 @@ export default function App() {
             <div className="max-w-5xl mx-auto space-y-10 pb-24 text-left">
                {collaborators.map(name => (
                   <div key={name} className="bg-white rounded-[3rem] p-10 shadow-xl border border-slate-200">
-                     <div className="flex items-center gap-6 mb-8"><div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-black italic">{name.charAt(0)}</div><span className="text-3xl font-black text-slate-950 tracking-tighter uppercase">{name}</span></div>
-                     <textarea className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-lg font-bold text-slate-700 leading-relaxed italic shadow-inner" placeholder={`Saisissez vos directives pour ${name}...`} value={actionPlans[name.toLowerCase().replace(/\s/g, '')] || ''} onChange={(e) => setActionPlans({...actionPlans, [name.toLowerCase().replace(/\s/g, '')]: e.target.value})}/>
+                     <div className="flex items-center gap-6 mb-8"><div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-black italic shadow-inner">{name.charAt(0)}</div><span className="text-3xl font-black text-slate-950 tracking-tighter uppercase">{name}</span></div>
+                     <textarea className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-lg font-bold text-slate-700 leading-relaxed italic shadow-inner" placeholder={`Directives de coaching pour ${name}...`} value={actionPlans[name.toLowerCase().replace(/\s/g, '')] || ''} onChange={(e) => setActionPlans({...actionPlans, [name.toLowerCase().replace(/\s/g, '')]: e.target.value})}/>
                   </div>
                ))}
-               <button onClick={() => setActiveTab('analyse')} className="w-full py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-2xl shadow-2xl hover:bg-indigo-700 uppercase tracking-tighter transform hover:-translate-y-1 transition-all">Voir le PDF final</button>
+               <button onClick={() => setActiveTab('analyse')} className="w-full py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-2xl shadow-2xl hover:bg-indigo-700 uppercase tracking-tighter transform hover:-translate-y-1 transition-all">Mettre à jour le rapport PDF</button>
             </div>
           )}
           {activeTab === 'config' && (
-            <div className="max-w-2xl mx-auto text-left">
+            <div className="max-w-2xl mx-auto text-left text-left">
                <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100">
                   <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600 italic tracking-tighter"><Settings size={24}/> Paramètres IA</h3>
                   <div className="space-y-6">
                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[12px] font-bold shadow-sm">
-                        <p className="mb-2 uppercase tracking-wider italic">Aide à la connexion :</p>
+                        <p className="mb-2 uppercase tracking-wider italic">Guide de connexion :</p>
                         <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 hover:underline">
                            1. Créer une clé gratuite sur Google AI Studio <ExternalLink size={14}/>
                         </a>
-                        <p className="mt-1 font-normal opacity-80 italic">Note : Utilisez une clé Google AI Studio et non une clé Google Cloud.</p>
+                        <p className="mt-1 font-normal opacity-80 italic">Attention : Utilisez bien une clé "Google AI Studio" et non "Google Cloud Platform". Elle doit commencer par "AIza".</p>
                      </div>
                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">Clé API Google Gemini (Format AIza...)</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic tracking-widest">Clé API Google Gemini (Format AIza...)</label>
                         <input type="password" value={userApiKey} onChange={(e) => saveApiKey(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-600 outline-none font-mono text-sm shadow-inner" placeholder="Collez votre clé ici..."/>
                         <p className="mt-2 text-[10px] text-slate-400 italic">Cette clé est stockée uniquement dans votre navigateur.</p>
                      </div>
@@ -520,7 +520,7 @@ export default function App() {
               <div className="flex items-center gap-4"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50 tracking-tighter">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer"><X size={24}/></button></div>
            </div>
            <div className="flex-1 w-full bg-slate-800 rounded-2xl overflow-y-auto p-6 shadow-inner">
-              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
+              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10 text-left"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic tracking-widest">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
            </div>
         </div>
       )}
