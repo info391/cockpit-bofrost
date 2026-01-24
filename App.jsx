@@ -237,7 +237,7 @@ export default function App() {
   };
 
   const fetchWithRetry = async (url, options, maxRetries = 3) => {
-    let lastError = new Error("Erreur inconnue");
+    let lastStatusText = "";
     for (let i = 0; i < maxRetries; i++) {
       try {
         const response = await fetch(url, options);
@@ -250,27 +250,26 @@ export default function App() {
           continue;
         }
 
-        if (!response.ok || res.error) {
-          throw new Error(res.error?.message || `Erreur serveur : ${response.status}`);
+        if (!response.ok) {
+          throw new Error(res.error?.message || `Serveur Google : ${response.status} ${response.statusText}`);
         }
 
         if (!res || !res.candidates || res.candidates.length === 0) {
-          throw new Error("Réponse vide.");
+          throw new Error("Réponse de l'IA incomplète.");
         }
 
         return res;
       } catch (err) {
-        lastError = err;
-        if (i === maxRetries - 1) throw lastError;
+        lastStatusText = err.message;
+        if (i === maxRetries - 1) throw new Error(lastStatusText);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    throw lastError;
   };
 
   const handleAnalyse = async () => {
     if (!userApiKey) {
-      setErrorMsg("Veuillez saisir votre clé API Gemini dans l'onglet Configuration.");
+      setErrorMsg("Saisissez votre clé API dans l'onglet Configuration.");
       setActiveTab('config');
       return;
     }
@@ -278,34 +277,30 @@ export default function App() {
     setErrorMsg(null);
     setRetryCount(0);
     
-    // Prompt de coaching simplifié et fusionné
-    const systemPrompt = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    TA STRUCTURE DE RÉPONSE DOIT ÊTRE :
+    const instructions = `Tu es l'Expert Coach EMconsulting Bofrost. 
+    STRUTURE OBLIGATOIRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
-    2. Liste 3 points positifs [POS] et 3 d'amélioration [AMEL]
-    3. Pour chaque collaborateur, utilise EXACTEMENT la balise : [COLLAB_START]Nom[COLLAB_END]
+    2. 3 points [POS] et 3 points [AMEL]
+    3. Pour chaque collaborateur : [COLLAB_START]Nom[COLLAB_END]
     4. CIBLE : 12 BC/jour.`;
 
-    const fullMessage = `${systemPrompt}\n\nVoici les données Bofrost à analyser pour la période ${periodText} :\n${pastedData}`;
+    const fullPrompt = `${instructions}\n\nDonnées à analyser :\n${pastedData}`;
 
-    // Liste des modèles et versions à tester dynamiquement
-    const configs = [
+    // Stratégie multi-modèles avec rapports d'erreur détaillés
+    const attempts = [
       { ver: 'v1beta', model: 'gemini-1.5-flash' },
-      { ver: 'v1', model: 'gemini-1.5-flash' },
-      { ver: 'v1beta', model: 'gemini-pro' }
+      { ver: 'v1beta', model: 'gemini-1.5-pro' },
+      { ver: 'v1', model: 'gemini-1.5-flash' }
     ];
 
     let success = false;
+    let errors = [];
 
-    for (const config of configs) {
+    for (const config of attempts) {
       if (success) break;
       try {
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
-        
-        // Structure de payload simplifiée compatible v1 et v1beta
-        const body = {
-          contents: [{ parts: [{ text: fullMessage }] }]
-        };
+        const body = { contents: [{ parts: [{ text: fullPrompt }] }] };
 
         const res = await fetchWithRetry(url, {
           method: 'POST',
@@ -314,7 +309,6 @@ export default function App() {
         });
 
         const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
-        
         if (text) {
           setAnalysis(text);
           setActiveTab('analyse');
@@ -322,16 +316,12 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        if (err.message.includes("not found") || err.message.includes("404")) {
-          continue; // On essaie la config suivante
-        }
-        setErrorMsg(`Erreur : ${err.message}.`);
-        break;
+        errors.push(`${config.model} (${config.ver}) : ${err.message}`);
       }
     }
 
-    if (!success && !errorMsg) {
-      setErrorMsg("Impossible de joindre Gemini. Vérifiez votre clé API sur Google AI Studio.");
+    if (!success) {
+      setErrorMsg(`Échec de connexion. Détails techniques : \n${errors.join('\n')}`);
     }
     
     setLoading(false);
@@ -407,7 +397,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.5</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.6</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -451,7 +441,7 @@ export default function App() {
                    </div>
                 </div>
 
-                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-xs font-bold flex items-start gap-3"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
+                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[10px] font-mono whitespace-pre-wrap flex items-start gap-3"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
                 
                 <div className="mt-8 flex justify-end">
                   <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">
