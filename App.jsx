@@ -251,7 +251,7 @@ export default function App() {
         }
 
         if (!response.ok) {
-          throw new Error(res.error?.message || `Serveur : ${response.status}`);
+          throw new Error(res.error?.message || `Erreur Serveur : ${response.status}`);
         }
 
         if (!res || !res.candidates || res.candidates.length === 0) {
@@ -284,13 +284,13 @@ export default function App() {
     3. Pour chaque collaborateur : [COLLAB_START]Nom[COLLAB_END]
     CIBLE : 12 BC/jour.`;
 
-    const fullPrompt = `${instructions}\n\nDonnées :\n${pastedData}`;
+    const fullPrompt = `${instructions}\n\nDonnées à analyser :\n${pastedData}`;
 
-    // Stratégie de modèles mise à jour pour 2024/2025
+    // MISE À JOUR : Liste de modèles élargie incluant les alias "latest"
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
       { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
-      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
       { ver: 'v1beta', model: 'gemini-pro' }
     ];
 
@@ -301,7 +301,11 @@ export default function App() {
       if (success) break;
       try {
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
-        const body = { contents: [{ parts: [{ text: fullPrompt }] }] };
+        
+        // Payload fusionné (plus robuste pour tous les endpoints)
+        const body = { 
+          contents: [{ parts: [{ text: fullPrompt }] }] 
+        };
 
         const res = await fetchWithRetry(url, {
           method: 'POST',
@@ -317,12 +321,12 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        errors.push(`${config.model} (${config.ver}) : ${err.message}`);
+        errors.push(`${config.model} : ${err.message}`);
       }
     }
 
     if (!success) {
-      setErrorMsg(`Aucun modèle n'a répondu. Détails techniques : \n${errors.join('\n')}`);
+      setErrorMsg(`Impossible d'établir la connexion. Veuillez vérifier que votre clé API Google AI Studio est bien active. Détails :\n${errors.join('\n')}`);
     }
     
     setLoading(false);
@@ -398,7 +402,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.7</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.8</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
