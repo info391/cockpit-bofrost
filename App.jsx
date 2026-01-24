@@ -241,7 +241,12 @@ export default function App() {
     for (let i = 0; i < maxRetries; i++) {
       try {
         const response = await fetch(url, options);
-        const res = await response.json();
+        let res = null;
+        try {
+          res = await response.json();
+        } catch (e) {
+          throw new Error(`Réponse non-JSON du serveur (Code ${response.status})`);
+        }
         
         if (response.status === 429) { 
           const delay = Math.pow(2, i) * 2000;
@@ -251,11 +256,11 @@ export default function App() {
         }
 
         if (!response.ok) {
-          throw new Error(res.error?.message || `Erreur Serveur : ${response.status}`);
+          throw new Error(res?.error?.message || `Erreur Serveur : ${response.status} ${response.statusText}`);
         }
 
         if (!res || !res.candidates || res.candidates.length === 0) {
-          throw new Error("Réponse vide.");
+          throw new Error("L'IA n'a renvoyé aucun résultat (Safety Filter peut-être ?).");
         }
 
         return res;
@@ -265,6 +270,7 @@ export default function App() {
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
+    throw lastError;
   };
 
   const handleAnalyse = async () => {
@@ -286,12 +292,11 @@ export default function App() {
 
     const fullPrompt = `${instructions}\n\nDonnées à analyser :\n${pastedData}`;
 
-    // MISE À JOUR : Liste de modèles élargie incluant les alias "latest"
+    // MISE À JOUR : Priorité à Gemini 2.0 qui semble être celui qui répond à votre clé
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
-      { ver: 'v1beta', model: 'gemini-1.5-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
-      { ver: 'v1beta', model: 'gemini-pro' }
+      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
+      { ver: 'v1', model: 'gemini-1.5-flash' }
     ];
 
     let success = false;
@@ -302,7 +307,6 @@ export default function App() {
       try {
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
         
-        // Payload fusionné (plus robuste pour tous les endpoints)
         const body = { 
           contents: [{ parts: [{ text: fullPrompt }] }] 
         };
@@ -313,7 +317,7 @@ export default function App() {
           body: JSON.stringify(body)
         });
 
-        const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+        const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
         if (text) {
           setAnalysis(text);
           setActiveTab('analyse');
@@ -326,7 +330,7 @@ export default function App() {
     }
 
     if (!success) {
-      setErrorMsg(`Impossible d'établir la connexion. Veuillez vérifier que votre clé API Google AI Studio est bien active. Détails :\n${errors.join('\n')}`);
+      setErrorMsg(`Échec critique. Détails des tentatives :\n${errors.join('\n')}\n\nAstuce : Vérifiez que votre clé est bien une clé Google AI Studio et non GCP.`);
     }
     
     setLoading(false);
@@ -402,7 +406,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.8</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.9</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -446,14 +450,14 @@ export default function App() {
                    </div>
                 </div>
 
-                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[10px] font-mono whitespace-pre-wrap flex items-start gap-3"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
+                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-[10px] font-mono whitespace-pre-wrap flex items-start gap-3 shadow-sm transition-all animate-in fade-in"><AlertCircle size={20} className="shrink-0"/> <span>{errorMsg}</span></div>}
                 
                 <div className="mt-8 flex justify-end">
-                  <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">
+                  <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3 active:scale-95 cursor-pointer">
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin" /> 
-                        {retryCount > 0 ? `Retry (${retryCount})...` : "IA en cours..."}
+                        {retryCount > 0 ? `Retry (${retryCount})...` : "Analyse IA..."}
                       </>
                     ) : (
                       <>
@@ -482,7 +486,7 @@ export default function App() {
                <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100">
                   <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600 italic tracking-tighter"><Settings size={24}/> Paramètres IA</h3>
                   <div className="space-y-6">
-                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[12px] font-bold">
+                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[12px] font-bold shadow-sm">
                         <p className="mb-2 uppercase tracking-wider italic">Guide de connexion :</p>
                         <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 hover:underline">
                            1. Créer une clé gratuite sur Google AI Studio <ExternalLink size={14}/>
