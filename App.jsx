@@ -268,6 +268,7 @@ export default function App() {
     setErrorMsg(null);
     setRetryCount(0);
     
+    // Système de prompt fusionné pour éviter les erreurs de champ systemInstruction sur certains endpoints
     const systemPrompt = `Tu es l'Expert Coach EMconsulting Bofrost. 
     STRUCTURE DE RÉPONSE OBLIGATOIRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
@@ -276,17 +277,20 @@ export default function App() {
     4. Utilise [ALERT] pour les points critiques individuels.
     CIBLE : 12 BC/jour.`;
 
+    const fullPrompt = `${systemPrompt}\n\nVoici les données de performance pour la période ${periodText} :\n${pastedData}`;
+
     try {
-      // FIX : Utilisation du nom de modèle stable "gemini-1.5-flash" sans le suffixe "-latest" si celui-ci cause des erreurs
-      // L'endpoint v1beta reste le meilleur choix pour les system_instruction
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
+      // FIX ULTIME : Passage à l'endpoint STABLE v1 et fusion du prompt
+      // Cela évite les erreurs "model not found for v1beta" et "unknown field systemInstruction"
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
       
       const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Performance Bofrost ${periodText} : \n${pastedData}` }] }],
-          system_instruction: { parts: [{ text: systemPrompt }] }
+          contents: [{ 
+            parts: [{ text: fullPrompt }] 
+          }]
         })
       };
 
@@ -298,7 +302,7 @@ export default function App() {
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg(`Erreur : ${err.message}. Vérifiez que votre clé est bien active et que vous utilisez le modèle Gemini 1.5 Flash.`);
+      setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API dans l'onglet Configuration.`);
     } finally { setLoading(false); }
   };
 
@@ -372,7 +376,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.0</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.1</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
