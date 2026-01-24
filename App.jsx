@@ -277,14 +277,15 @@ export default function App() {
     CIBLE : 12 BC/jour.`;
 
     try {
-      // MISE À JOUR : Utilisation du modèle 'gemini-1.5-flash-latest' et correction du champ 'system_instruction'
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${userApiKey}`;
+      // FIX : Utilisation du nom de modèle stable "gemini-1.5-flash" sans le suffixe "-latest" si celui-ci cause des erreurs
+      // L'endpoint v1beta reste le meilleur choix pour les system_instruction
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
+      
       const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: `Performance Bofrost ${periodText} : \n${pastedData}` }] }],
-          // Correction syntaxique pour compatibilité maximale (snake_case)
           system_instruction: { parts: [{ text: systemPrompt }] }
         })
       };
@@ -297,7 +298,7 @@ export default function App() {
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg(`Erreur : ${err.message}. Assurez-vous que votre clé Google AI Studio est bien active.`);
+      setErrorMsg(`Erreur : ${err.message}. Vérifiez que votre clé est bien active et que vous utilisez le modèle Gemini 1.5 Flash.`);
     } finally { setLoading(false); }
   };
 
@@ -371,7 +372,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.9</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.0</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
