@@ -236,25 +236,30 @@ export default function App() {
     localStorage.setItem('em_gemini_key', cleanKey);
   };
 
-  const fetchWithRetry = async (url, options, maxRetries = 5) => {
+  const fetchWithRetry = async (url, options, maxRetries = 3) => {
     for (let i = 0; i < maxRetries; i++) {
       try {
         const response = await fetch(url, options);
         const res = await response.json();
         
-        if (response.status === 429) { // Quota Exceeded
-          const delay = Math.pow(2, i) * 1000;
+        if (response.status === 429) { 
+          const delay = Math.pow(2, i) * 2000;
           setRetryCount(i + 1);
           await new Promise(resolve => setTimeout(resolve, delay));
           continue;
         }
 
-        if (res.error) throw new Error(res.error.message);
+        if (res.error) {
+          // Si le modèle n'est pas trouvé sur cet endpoint, on essaie une variante
+          if (res.error.message.includes("not found")) {
+             throw new Error("Modèle non trouvé. Tentative de reconnexion...");
+          }
+          throw new Error(res.error.message);
+        }
         return res;
       } catch (err) {
         if (i === maxRetries - 1) throw err;
-        const delay = Math.pow(2, i) * 1000;
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
   };
@@ -278,8 +283,8 @@ export default function App() {
     CIBLE : 12 BC/jour.`;
 
     try {
-      // Utilisation de gemini-1.5-flash (stable) au lieu de la version preview
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
+      // CHANGEMENT : Utilisation de l'endpoint stable V1 au lieu de v1beta
+      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
       const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -297,7 +302,7 @@ export default function App() {
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg(`Erreur : ${err.message}. Cela arrive souvent si votre quota gratuit Google est épuisé. Patientez quelques minutes.`);
+      setErrorMsg(`Erreur : ${err.message}. Si l'erreur persiste, vérifiez que votre clé API est bien active sur Google AI Studio.`);
     } finally { setLoading(false); }
   };
 
@@ -371,7 +376,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.6</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.7</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
