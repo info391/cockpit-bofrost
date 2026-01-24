@@ -247,7 +247,7 @@ export default function App() {
         try {
           res = JSON.parse(resText);
         } catch (e) {
-          throw new Error(`Format réponse incorrect (Code ${response.status})`);
+          throw new Error(`Format réponse incorrect (Code ${response.status}) : ${resText.substring(0, 50)}...`);
         }
         
         if (response.status === 429) { 
@@ -294,17 +294,18 @@ export default function App() {
     2. Liste ensuite 3 points positifs commençant chacun par [POS]
     3. Liste 3 points d'amélioration commençant chacun par [AMEL]
     4. Pour chaque collaborateur, utilise EXACTEMENT cette balise : [COLLAB_START]Nom Complet[COLLAB_END]
-    5. Utilise [ALERT] pour signaler un ratio critique (ex: Porte/Présent > 3).
+    5. Utilise [ALERT] pour signaler un ratio critique.
     
     CIBLE PERFORMANCE : 12 BC/jour.
-    DONNÉES À ANALYSER POUR LA PÉRIODE ${periodText} :
+    DONNÉES À ANALYSER :
     ${pastedData}`;
 
-    // STRATÉGIE DE MODÈLES : Nettoyage du préfixe "models/" qui causait un doublement du chemin
+    // STRATÉGIE DE MODÈLES : Utilisation prioritaire des alias -latest qui sont souvent les plus accessibles
     const attempts = [
-      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
       { ver: 'v1beta', model: 'gemini-1.5-flash' },
-      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' }
+      { ver: 'v1', model: 'gemini-1.5-flash' }
     ];
 
     let success = false;
@@ -313,7 +314,6 @@ export default function App() {
     for (const config of attempts) {
       if (success) break;
       try {
-        // L'URL contient déjà /models/, donc on ne doit pas l'ajouter au nom du modèle
         const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
         
         const body = { 
@@ -339,7 +339,7 @@ export default function App() {
     }
 
     if (!success) {
-      setErrorMsg(`Échec de l'Analyse. Détails des tentatives :\n${errors.join('\n')}\n\nNote : Assurez-vous d'utiliser une clé "Google AI Studio" générée sur aistudio.google.com.`);
+      setErrorMsg(`Échec de l'Analyse. Détails des tentatives :\n${errors.join('\n')}\n\nNote : Vérifiez que votre clé Google AI Studio est bien active.`);
     }
     
     setLoading(false);
@@ -420,7 +420,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v18.6</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v18.7</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
