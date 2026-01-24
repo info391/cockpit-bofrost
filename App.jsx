@@ -6,7 +6,7 @@ import {
 import { 
   ClipboardPaste, TrendingUp, AlertCircle,
   Loader2, User, ListTodo, Scale, ChevronRight, ShieldCheck, 
-  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal, Globe
+  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal, Globe, Settings, Database
 } from 'lucide-react';
 
 // --- COMPOSANTS UI ---
@@ -133,8 +133,10 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [actionPlans, setActionPlans] = useState({});
   const [errorMsg, setErrorMsg] = useState(null);
+  
+  // Gestion de la clé API via l'interface
+  const [userApiKey, setUserApiKey] = useState(localStorage.getItem('em_gemini_key') || '');
 
-  const apiKey = ""; 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
   useEffect(() => {
@@ -151,7 +153,7 @@ export default function App() {
     if (lines.length < 2) return "Période à définir";
     const headers = lines[0].split(/[|\t]/).map(h => h.trim().toLowerCase());
     const weekIdx = headers.findIndex(h => h.includes("semaine"));
-    if (weekIdx === -1) return "Données partielles";
+    if (weekIdx === -1) return "Semaine non détectée";
     const allWeeks = new Set();
     lines.slice(1).forEach(l => {
       const p = l.split(/[|\t]/);
@@ -175,14 +177,17 @@ export default function App() {
       presents: find(["présents", "presents"]), prospects: find(["prospects"]),
       closings: find(["closings"]), bc: find(["bc annoncés", "bc"])
     };
+    
     const map = {};
     lines.slice(1).forEach(line => {
       const p = line.split(/[|\t]/).map(v => v.trim());
-      const rawName = idx.name !== -1 ? p[idx.name] : 'Inconnu';
-      if (rawName === 'Inconnu' || !rawName) return;
+      const rawName = idx.name !== -1 ? p[idx.name] : null;
+      if (!rawName || rawName === "Nom du collaborateur") return;
+      
       const normName = rawName.toLowerCase().replace(/\s/g, '');
       const weekNum = idx.semaine !== -1 && p[idx.semaine] ? p[idx.semaine].replace(/[^0-9]/g, '') : "0";
       const weekKey = `${normName}_W${weekNum}`;
+      
       if (!map[weekKey]) {
         map[weekKey] = {
           name: rawName, normName: normName, weekLabel: `S${weekNum}`,
@@ -196,6 +201,7 @@ export default function App() {
       map[weekKey].closings += parseInt(p[idx.closings]) || 0;
       map[weekKey].bc += parseInt(p[idx.bc]) || 0;
     });
+
     const collabFinalMap = {};
     Object.values(map).forEach(w => {
       const d = {
@@ -224,35 +230,47 @@ export default function App() {
     if (values.length > 0) setCollaborators(values.map(c => c.name));
   }, [processedDataMap]);
 
+  const saveApiKey = (key) => {
+    setUserApiKey(key);
+    localStorage.setItem('em_gemini_key', key);
+  };
+
   const handleAnalyse = async () => {
+    if (!userApiKey) {
+      setErrorMsg("Veuillez saisir votre clé API Gemini dans l'onglet Configuration.");
+      return;
+    }
     setLoading(true);
     setErrorMsg(null);
-    const system = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    TA STRUCTURE DE RÉPONSE DOIT ÊTRE STRICTE :
-    1. Commence par [SECTION_START]Synthèse Agence[SECTION_END]
-    2. Liste 3 points positifs commençant par [POS]
-    3. Liste 3 points d'amélioration commençant par [AMEL]
-    4. Pour chaque collaborateur, utilise EXACTEMENT cette balise : [COLLAB_START]Nom Complet[COLLAB_END]
-    5. Utilise [ALERT] pour les points critiques individuels.
-    CIBLE : 12 BC/jour.`;
     
+    const system = `Tu es l'Expert Coach EMconsulting Bofrost. 
+    STRUCTURE DE RÉPONSE OBLIGATOIRE :
+    1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
+    2. Utilise impérativement 3 lignes avec [POS] et 3 avec [AMEL]
+    3. Pour chaque collaborateur, utilise EXACTEMENT : [COLLAB_START]Nom[COLLAB_END]
+    4. Utilise [ALERT] pour les points critiques individuels.
+    CIBLE : 12 BC/jour.`;
+
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userApiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Analyser la performance Bofrost pour la période ${periodText} : \n${pastedData}` }] }],
+          contents: [{ parts: [{ text: `Performance Bofrost ${periodText} : \n${pastedData}` }] }],
           systemInstruction: { parts: [{ text: system }] }
         })
       });
+      
       const res = await response.json();
       if (res.error) throw new Error(res.error.message);
+      
       const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!text) throw new Error("Réponse vide de l'IA.");
+      if (!text) throw new Error("L'IA n'a pas renvoyé de texte.");
+      
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg("Erreur de connexion avec l'IA. Vérifiez votre connexion ou réessayez.");
+      setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API.`);
     } finally { setLoading(false); }
   };
 
@@ -262,24 +280,12 @@ export default function App() {
     const lines = analysis.split('\n');
     let currentBlock = null;
     let agencySummary = { pos: [], amel: [] };
-    let hasTags = analysis.includes('[SECTION_START]') || analysis.includes('[COLLAB_START]');
-
-    // Si aucune balise n'est présente, on affiche le texte brut de manière élégante
-    if (!hasTags) {
-      return (
-        <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2rem] shadow-xl border border-amber-100 text-left">
-          <div className="flex items-center gap-3 mb-6 text-amber-600">
-            <AlertTriangle size={24} />
-            <h3 className="font-black uppercase tracking-tighter">Analyse Brute (Structure simplifiée)</h3>
-          </div>
-          <div className="whitespace-pre-wrap text-slate-700 leading-relaxed font-medium text-base">
-            {analysis}
-          </div>
-        </div>
-      );
+    
+    // Fallback si l'IA ne respecte pas les balises
+    if (!analysis.includes('[SECTION_START]') && !analysis.includes('[COLLAB_START]')) {
+      return <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2rem] shadow-xl text-left whitespace-pre-wrap text-slate-700 leading-relaxed font-medium">{analysis}</div>;
     }
 
-    // Parsing structuré
     lines.forEach(line => {
       const cleanLine = line.replace(/\[UP\]|\[DOWN\]|\[STABLE\]/g, '').trim();
       if (line.toUpperCase().includes('[POS]')) agencySummary.pos.push(cleanLine.replace(/\[POS\]/gi, '').trim());
@@ -288,9 +294,7 @@ export default function App() {
 
     lines.forEach((line) => {
       const clean = line.replace(/\[UP\]|\[DOWN\]|\[STABLE\]/g, '').trim();
-      if (line.includes('[SECTION_START]')) {
-        items.push({ type: 'title', content: clean.replace(/\[SECTION_START\]|\[SECTION_END\]/g, ''), summary: { ...agencySummary } });
-      } 
+      if (line.includes('[SECTION_START]')) items.push({ type: 'title', content: clean.replace(/\[SECTION_START\]|\[SECTION_END\]/g, ''), summary: { ...agencySummary } });
       else if (line.includes('[COLLAB_START]')) {
         const name = clean.replace(/\[COLLAB_START\]|\[COLLAB_END\]/g, '').trim();
         currentBlock = { type: 'collaborator', name, normName: name.toLowerCase().replace(/\s/g, ''), analysis: [], badges: { up: line.includes('[UP]'), down: line.includes('[DOWN]') } };
@@ -311,9 +315,9 @@ export default function App() {
           <div key={idx} className="px-4 agency-summary-section text-left">
              <div className="flex items-center gap-4 mb-6 mt-2"><h3 className="text-lg font-black text-indigo-950 uppercase border-l-[4px] border-indigo-600 pl-4">{item.content}</h3><div className="h-px bg-slate-200 flex-1"></div></div>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:bg-white"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
-                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:bg-white"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
-                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
+                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
              </div>
           </div>
         );
@@ -341,7 +345,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60">Stable Release v16.3</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.4</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -349,6 +353,7 @@ export default function App() {
             <SidebarLink active={activeTab === 'import'} onClick={() => setActiveTab('import')} icon={<ClipboardPaste size={16}/>} label="Source de Données" />
             <SidebarLink active={activeTab === 'analyse'} onClick={() => setActiveTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Performance" disabled={!analysis} />
             <SidebarLink active={activeTab === 'plans'} onClick={() => setActiveTab('plans')} icon={<ListTodo size={16}/>} label="Directives Coaching" disabled={collaborators.length === 0} />
+            <SidebarLink active={activeTab === 'config'} onClick={() => setActiveTab('config')} icon={<Settings size={16}/>} label="Configuration" />
           </nav>
           <div className="p-4 bg-white/5 rounded-xl border border-white/10">
              <h3 className="font-black text-indigo-400 uppercase tracking-[0.2em] text-[8px] mb-4">Les 6 Seuils d'Or</h3>
@@ -370,9 +375,23 @@ export default function App() {
           {activeTab === 'import' && (
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
               <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
-                <h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase mb-8">Données Bofrost</h3>
-                <textarea className="w-full h-80 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données Sheets ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
-                {errorMsg && <div className="mt-4 p-3 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-100">{errorMsg}</div>}
+                <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3></div></div>
+                <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
+                
+                {/* DEBUGGER VISUEL */}
+                <div className="mt-6 grid grid-cols-2 gap-4">
+                   <div className={`p-4 rounded-xl border flex items-center gap-3 ${collaborators.length > 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
+                      <Database size={20}/>
+                      <div><p className="text-[10px] font-black uppercase">Collaborateurs détectés</p><p className="text-lg font-bold">{collaborators.length}</p></div>
+                   </div>
+                   <div className={`p-4 rounded-xl border flex items-center gap-3 ${userApiKey ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
+                      <Settings size={20}/>
+                      <div><p className="text-[10px] font-black uppercase">Clé IA Gemini</p><p className="text-lg font-bold">{userApiKey ? 'CONFIGURÉE' : 'MANQUANTE'}</p></div>
+                   </div>
+                </div>
+
+                {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-3"><AlertCircle size={20}/> {errorMsg}</div>}
+                
                 <div className="mt-8 flex justify-end"><button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">{loading ? <Loader2 className="animate-spin" /> : <ArrowUpRight />} Lancer l'Analyse</button></div>
               </div>
             </div>
@@ -389,16 +408,33 @@ export default function App() {
                <button onClick={() => setActiveTab('analyse')} className="w-full py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-2xl shadow-2xl hover:bg-indigo-700 uppercase">Voir le PDF final</button>
             </div>
           )}
+          {activeTab === 'config' && (
+            <div className="max-w-2xl mx-auto text-left">
+               <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100">
+                  <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600"><Settings size={24}/> Paramètres IA</h3>
+                  <div className="space-y-6">
+                     <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">Clé API Google Gemini (Flash 2.5)</label>
+                        <input type="password" value={userApiKey} onChange={(e) => saveApiKey(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-600 outline-none font-mono text-sm" placeholder="Collez votre clé API ici..."/>
+                        <p className="mt-2 text-[10px] text-slate-400">Cette clé est stockée uniquement sur votre navigateur et permet à l'outil de générer les analyses professionnelles.</p>
+                     </div>
+                     <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 text-[11px] text-indigo-800 font-medium">
+                        L'outil v16.4 utilise la vision augmentée de Gemini pour détecter automatiquement les chutes de BC et proposer des actions de coaching.
+                     </div>
+                  </div>
+               </div>
+            </div>
+          )}
         </div>
       </main>
       {showApercu && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-md flex flex-col items-center p-4 overflow-hidden">
-           <div className="w-full max-w-7xl flex items-center justify-between mb-3 text-white px-2 text-left">
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-md flex flex-col items-center p-4 overflow-hidden text-left">
+           <div className="w-full max-w-7xl flex items-center justify-between mb-3 text-white px-2">
               <div className="flex items-center gap-3"><div className="p-2 bg-indigo-600 rounded-lg"><Eye size={18}/></div><div><h3 className="text-lg font-black uppercase tracking-widest leading-none">Rapport Prêt</h3></div></div>
-              <div className="flex items-center gap-4"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer"><X size={24}/></button></div>
+              <div className="flex items-center gap-4"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50 tracking-tighter">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer"><X size={24}/></button></div>
            </div>
            <div className="flex-1 w-full bg-slate-800 rounded-2xl overflow-y-auto p-6 shadow-inner">
-              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10 text-left"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
+              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
            </div>
         </div>
       )}
