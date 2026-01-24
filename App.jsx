@@ -255,7 +255,7 @@ export default function App() {
         }
 
         if (!res || !res.candidates || res.candidates.length === 0) {
-          throw new Error("L'IA n'a renvoyé aucun candidat de réponse.");
+          throw new Error("Réponse vide.");
         }
 
         return res;
@@ -278,37 +278,41 @@ export default function App() {
     setErrorMsg(null);
     setRetryCount(0);
     
+    // Prompt de coaching simplifié et fusionné
     const systemPrompt = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    STRUCTURE DE RÉPONSE OBLIGATOIRE :
+    TA STRUCTURE DE RÉPONSE DOIT ÊTRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
-    2. Utilise impérativement 3 lignes avec [POS] et 3 avec [AMEL]
-    3. Pour chaque collaborateur, utilise EXACTEMENT : [COLLAB_START]Nom[COLLAB_END]
-    4. Utilise [ALERT] pour les points critiques individuels.
-    CIBLE : 12 BC/jour.`;
+    2. Liste 3 points positifs [POS] et 3 d'amélioration [AMEL]
+    3. Pour chaque collaborateur, utilise EXACTEMENT la balise : [COLLAB_START]Nom[COLLAB_END]
+    4. CIBLE : 12 BC/jour.`;
 
-    const fullPrompt = `${systemPrompt}\n\nVoici les données de performance pour la période ${periodText} :\n${pastedData}`;
+    const fullMessage = `${systemPrompt}\n\nVoici les données Bofrost à analyser pour la période ${periodText} :\n${pastedData}`;
 
-    // Liste des modèles à essayer par ordre de priorité pour maximiser la réussite
-    const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-pro'];
+    // Liste des modèles et versions à tester dynamiquement
+    const configs = [
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },
+      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-pro' }
+    ];
+
     let success = false;
 
-    for (const modelName of models) {
+    for (const config of configs) {
       if (success) break;
       try {
-        // FIX : Toujours utiliser v1beta pour le support natif de system_instruction et des modèles 1.5
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
+        const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
         
-        const options = {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: fullPrompt }] }],
-            // Inclusion en tant que system_instruction pour l'endpoint v1beta
-            system_instruction: { parts: [{ text: systemPrompt }] }
-          })
+        // Structure de payload simplifiée compatible v1 et v1beta
+        const body = {
+          contents: [{ parts: [{ text: fullMessage }] }]
         };
 
-        const res = await fetchWithRetry(url, options);
+        const res = await fetchWithRetry(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
         const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (text) {
@@ -318,18 +322,16 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        // Si c'est une erreur de modèle "non trouvé", on passe au suivant
         if (err.message.includes("not found") || err.message.includes("404")) {
-          continue; 
+          continue; // On essaie la config suivante
         }
-        // Sinon c'est une erreur plus grave (clé, quota), on l'affiche
-        setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API.`);
+        setErrorMsg(`Erreur : ${err.message}.`);
         break;
       }
     }
 
     if (!success && !errorMsg) {
-      setErrorMsg("Aucun modèle Gemini n'a pu être contacté. Vérifiez que votre clé est bien configurée sur Google AI Studio.");
+      setErrorMsg("Impossible de joindre Gemini. Vérifiez votre clé API sur Google AI Studio.");
     }
     
     setLoading(false);
@@ -405,7 +407,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.4</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.5</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
