@@ -6,7 +6,7 @@ import {
 import { 
   ClipboardPaste, TrendingUp, AlertCircle,
   Loader2, User, ListTodo, Scale, ChevronRight, ShieldCheck, 
-  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal, Globe, Settings, Database
+  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal, Globe, Settings, Database, ExternalLink
 } from 'lucide-react';
 
 // --- COMPOSANTS UI ---
@@ -134,7 +134,7 @@ export default function App() {
   const [actionPlans, setActionPlans] = useState({});
   const [errorMsg, setErrorMsg] = useState(null);
   
-  // Gestion de la clé API via l'interface
+  // Gestion de la clé API via le stockage local du navigateur
   const [userApiKey, setUserApiKey] = useState(localStorage.getItem('em_gemini_key') || '');
 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -231,13 +231,15 @@ export default function App() {
   }, [processedDataMap]);
 
   const saveApiKey = (key) => {
-    setUserApiKey(key);
-    localStorage.setItem('em_gemini_key', key);
+    const cleanKey = key.trim();
+    setUserApiKey(cleanKey);
+    localStorage.setItem('em_gemini_key', cleanKey);
   };
 
   const handleAnalyse = async () => {
     if (!userApiKey) {
       setErrorMsg("Veuillez saisir votre clé API Gemini dans l'onglet Configuration.");
+      setActiveTab('config');
       return;
     }
     setLoading(true);
@@ -281,7 +283,6 @@ export default function App() {
     let currentBlock = null;
     let agencySummary = { pos: [], amel: [] };
     
-    // Fallback si l'IA ne respecte pas les balises
     if (!analysis.includes('[SECTION_START]') && !analysis.includes('[COLLAB_START]')) {
       return <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2rem] shadow-xl text-left whitespace-pre-wrap text-slate-700 leading-relaxed font-medium">{analysis}</div>;
     }
@@ -345,7 +346,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.4</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.5</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -364,8 +365,8 @@ export default function App() {
         </div>
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden relative">
-        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden">
-          <div className="flex flex-col text-left"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic">{periodText}</p></div>
+        <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden text-left">
+          <div className="flex flex-col"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{periodText}</p></div>
           <div className="flex items-center gap-4">
              <button onClick={() => setShowApercu(true)} className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg font-black uppercase text-[9px] hover:bg-indigo-700 transition-all shadow-lg cursor-pointer active:scale-95" disabled={!analysis}><Eye size={14}/> Aperçu PDF</button>
              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-400 shadow-inner"><User size={18}/></div>
@@ -378,15 +379,14 @@ export default function App() {
                 <div className="flex items-center gap-6 mb-8"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none">Données Bofrost</h3></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 
-                {/* DEBUGGER VISUEL */}
                 <div className="mt-6 grid grid-cols-2 gap-4">
                    <div className={`p-4 rounded-xl border flex items-center gap-3 ${collaborators.length > 0 ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-slate-50 border-slate-200 text-slate-400'}`}>
                       <Database size={20}/>
-                      <div><p className="text-[10px] font-black uppercase">Collaborateurs détectés</p><p className="text-lg font-bold">{collaborators.length}</p></div>
+                      <div><p className="text-[10px] font-black uppercase tracking-tighter">Collaborateurs détectés</p><p className="text-lg font-bold">{collaborators.length}</p></div>
                    </div>
                    <div className={`p-4 rounded-xl border flex items-center gap-3 ${userApiKey ? 'bg-indigo-50 border-indigo-100 text-indigo-700' : 'bg-rose-50 border-rose-100 text-rose-700'}`}>
                       <Settings size={20}/>
-                      <div><p className="text-[10px] font-black uppercase">Clé IA Gemini</p><p className="text-lg font-bold">{userApiKey ? 'CONFIGURÉE' : 'MANQUANTE'}</p></div>
+                      <div><p className="text-[10px] font-black uppercase tracking-tighter">Clé IA Gemini</p><p className="text-lg font-bold">{userApiKey ? 'CONFIGURÉE' : 'MANQUANTE'}</p></div>
                    </div>
                 </div>
 
@@ -402,24 +402,29 @@ export default function App() {
                {collaborators.map(name => (
                   <div key={name} className="bg-white rounded-[3rem] p-10 shadow-xl border border-slate-200">
                      <div className="flex items-center gap-6 mb-8"><div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-black italic">{name.charAt(0)}</div><span className="text-3xl font-black text-slate-950 tracking-tighter uppercase">{name}</span></div>
-                     <textarea className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-lg font-bold text-slate-700 leading-relaxed italic" placeholder={`Directives pour ${name}...`} value={actionPlans[name.toLowerCase().replace(/\s/g, '')] || ''} onChange={(e) => setActionPlans({...actionPlans, [name.toLowerCase().replace(/\s/g, '')]: e.target.value})}/>
+                     <textarea className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-lg font-bold text-slate-700 leading-relaxed italic shadow-inner" placeholder={`Saisissez vos directives pour ${name}...`} value={actionPlans[name.toLowerCase().replace(/\s/g, '')] || ''} onChange={(e) => setActionPlans({...actionPlans, [name.toLowerCase().replace(/\s/g, '')]: e.target.value})}/>
                   </div>
                ))}
-               <button onClick={() => setActiveTab('analyse')} className="w-full py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-2xl shadow-2xl hover:bg-indigo-700 uppercase">Voir le PDF final</button>
+               <button onClick={() => setActiveTab('analyse')} className="w-full py-8 bg-indigo-600 text-white rounded-[3rem] font-black text-2xl shadow-2xl hover:bg-indigo-700 uppercase tracking-tighter transform hover:-translate-y-1 transition-all">Voir le PDF final</button>
             </div>
           )}
           {activeTab === 'config' && (
             <div className="max-w-2xl mx-auto text-left">
                <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100">
-                  <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600"><Settings size={24}/> Paramètres IA</h3>
+                  <h3 className="text-2xl font-black uppercase mb-6 flex items-center gap-3 text-indigo-600 italic tracking-tighter"><Settings size={24}/> Paramètres IA</h3>
                   <div className="space-y-6">
-                     <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">Clé API Google Gemini (Flash 2.5)</label>
-                        <input type="password" value={userApiKey} onChange={(e) => saveApiKey(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-600 outline-none font-mono text-sm" placeholder="Collez votre clé API ici..."/>
-                        <p className="mt-2 text-[10px] text-slate-400">Cette clé est stockée uniquement sur votre navigateur et permet à l'outil de générer les analyses professionnelles.</p>
+                     <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-[12px] font-bold">
+                        <p className="mb-2 uppercase tracking-wider italic">Guide de connexion :</p>
+                        <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-indigo-600 hover:underline">
+                           1. Créer une clé gratuite sur Google AI Studio <ExternalLink size={14}/>
+                        </a>
+                        <p className="mt-1 font-normal opacity-80">2. Cliquez sur "Create API key".</p>
+                        <p className="mt-1 font-normal opacity-80">3. Collez la clé ci-dessous pour activer l'analyse coach.</p>
                      </div>
-                     <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100 text-[11px] text-indigo-800 font-medium">
-                        L'outil v16.4 utilise la vision augmentée de Gemini pour détecter automatiquement les chutes de BC et proposer des actions de coaching.
+                     <div>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 italic">Clé API Google Gemini (Format AIza...)</label>
+                        <input type="password" value={userApiKey} onChange={(e) => saveApiKey(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-indigo-600 outline-none font-mono text-sm shadow-inner" placeholder="Collez votre clé ici..."/>
+                        <p className="mt-2 text-[10px] text-slate-400 italic">Cette clé est stockée uniquement dans votre navigateur (mémoire locale).</p>
                      </div>
                   </div>
                </div>
@@ -430,11 +435,11 @@ export default function App() {
       {showApercu && (
         <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-md flex flex-col items-center p-4 overflow-hidden text-left">
            <div className="w-full max-w-7xl flex items-center justify-between mb-3 text-white px-2">
-              <div className="flex items-center gap-3"><div className="p-2 bg-indigo-600 rounded-lg"><Eye size={18}/></div><div><h3 className="text-lg font-black uppercase tracking-widest leading-none">Rapport Prêt</h3></div></div>
+              <div className="flex items-center gap-3"><div className="p-2 bg-indigo-600 rounded-lg"><Eye size={18}/></div><div><h3 className="text-lg font-black uppercase tracking-widest leading-none italic tracking-tighter">Rapport Prêt pour Diffusion</h3></div></div>
               <div className="flex items-center gap-4"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50 tracking-tighter">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer"><X size={24}/></button></div>
            </div>
            <div className="flex-1 w-full bg-slate-800 rounded-2xl overflow-y-auto p-6 shadow-inner">
-              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
+              <div className="bg-white mx-auto shadow-2xl print-wrapper" style={{ width: '280mm' }} id="print-area"><div className="p-10"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic">Dossiers de Performance EMconsulting ({periodText})</p></div></div>{auditContent}</div></div>
            </div>
         </div>
       )}
