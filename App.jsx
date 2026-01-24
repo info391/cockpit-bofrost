@@ -288,50 +288,51 @@ export default function App() {
 
     const fullPrompt = `${systemPrompt}\n\nVoici les données de performance pour la période ${periodText} :\n${pastedData}`;
 
-    try {
-      // Endpoint v1 avec fallback manuel si le modèle par défaut n'est pas disponible
-      const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
-      
-      const options = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: fullPrompt }] }]
-        })
-      };
+    // Liste des modèles à essayer par ordre de priorité pour maximiser la réussite
+    const models = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-pro'];
+    let success = false;
 
-      const res = await fetchWithRetry(url, options);
-      const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
-      
-      if (!text) throw new Error("Le texte de l'analyse est manquant dans la réponse.");
-      
-      setAnalysis(text);
-      setActiveTab('analyse');
-    } catch (err) {
-      // Logique de secours si gemini-1.5-flash échoue à cause du modèle lui-même
-      if (err.message.includes("not found") || err.message.includes("supported")) {
-        setErrorMsg("Modèle standard non trouvé. Tentative de repli sur Gemini Pro...");
-        try {
-          const fallbackUrl = `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${userApiKey}`;
-          const res = await fetchWithRetry(fallbackUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ contents: [{ parts: [{ text: fullPrompt }] }] })
-          });
-          const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            setAnalysis(text);
-            setActiveTab('analyse');
-            setErrorMsg(null);
-            return;
-          }
-        } catch (e) {
-          setErrorMsg(`Erreur réseau : ${e.message}. Vérifiez que votre clé est bien configurée pour les modèles Gemini.`);
+    for (const modelName of models) {
+      if (success) break;
+      try {
+        // FIX : Toujours utiliser v1beta pour le support natif de system_instruction et des modèles 1.5
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${userApiKey}`;
+        
+        const options = {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: fullPrompt }] }],
+            // Inclusion en tant que system_instruction pour l'endpoint v1beta
+            system_instruction: { parts: [{ text: systemPrompt }] }
+          })
+        };
+
+        const res = await fetchWithRetry(url, options);
+        const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (text) {
+          setAnalysis(text);
+          setActiveTab('analyse');
+          success = true;
+          setErrorMsg(null);
         }
-      } else {
+      } catch (err) {
+        // Si c'est une erreur de modèle "non trouvé", on passe au suivant
+        if (err.message.includes("not found") || err.message.includes("404")) {
+          continue; 
+        }
+        // Sinon c'est une erreur plus grave (clé, quota), on l'affiche
         setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API.`);
+        break;
       }
-    } finally { setLoading(false); }
+    }
+
+    if (!success && !errorMsg) {
+      setErrorMsg("Aucun modèle Gemini n'a pu être contacté. Vérifiez que votre clé est bien configurée sur Google AI Studio.");
+    }
+    
+    setLoading(false);
   };
 
   const auditContent = useMemo(() => {
@@ -404,7 +405,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.3</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.4</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -455,7 +456,7 @@ export default function App() {
                     {loading ? (
                       <>
                         <Loader2 className="animate-spin" /> 
-                        {retryCount > 0 ? `Nouvelle tentative (${retryCount})...` : "Lancement de l'Analyse..."}
+                        {retryCount > 0 ? `Retry (${retryCount})...` : "IA en cours..."}
                       </>
                     ) : (
                       <>
