@@ -133,8 +133,8 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [actionPlans, setActionPlans] = useState({});
   const [errorMsg, setErrorMsg] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
   
-  // Gestion de la clé API via le stockage local du navigateur
   const [userApiKey, setUserApiKey] = useState(localStorage.getItem('em_gemini_key') || '');
 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -236,6 +236,29 @@ export default function App() {
     localStorage.setItem('em_gemini_key', cleanKey);
   };
 
+  const fetchWithRetry = async (url, options, maxRetries = 5) => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const response = await fetch(url, options);
+        const res = await response.json();
+        
+        if (response.status === 429) { // Quota Exceeded
+          const delay = Math.pow(2, i) * 1000;
+          setRetryCount(i + 1);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+
+        if (res.error) throw new Error(res.error.message);
+        return res;
+      } catch (err) {
+        if (i === maxRetries - 1) throw err;
+        const delay = Math.pow(2, i) * 1000;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  };
+
   const handleAnalyse = async () => {
     if (!userApiKey) {
       setErrorMsg("Veuillez saisir votre clé API Gemini dans l'onglet Configuration.");
@@ -244,6 +267,7 @@ export default function App() {
     }
     setLoading(true);
     setErrorMsg(null);
+    setRetryCount(0);
     
     const system = `Tu es l'Expert Coach EMconsulting Bofrost. 
     STRUCTURE DE RÉPONSE OBLIGATOIRE :
@@ -254,25 +278,26 @@ export default function App() {
     CIBLE : 12 BC/jour.`;
 
     try {
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${userApiKey}`, {
+      // Utilisation de gemini-1.5-flash (stable) au lieu de la version preview
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
+      const options = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           contents: [{ parts: [{ text: `Performance Bofrost ${periodText} : \n${pastedData}` }] }],
           systemInstruction: { parts: [{ text: system }] }
         })
-      });
-      
-      const res = await response.json();
-      if (res.error) throw new Error(res.error.message);
-      
+      };
+
+      const res = await fetchWithRetry(url, options);
       const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+      
       if (!text) throw new Error("L'IA n'a pas renvoyé de texte.");
       
       setAnalysis(text);
       setActiveTab('analyse');
     } catch (err) {
-      setErrorMsg(`Erreur : ${err.message}. Vérifiez votre clé API.`);
+      setErrorMsg(`Erreur : ${err.message}. Cela arrive souvent si votre quota gratuit Google est épuisé. Patientez quelques minutes.`);
     } finally { setLoading(false); }
   };
 
@@ -346,7 +371,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.5</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v16.6</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
@@ -392,7 +417,20 @@ export default function App() {
 
                 {errorMsg && <div className="mt-6 p-4 bg-rose-50 border border-rose-100 rounded-xl text-rose-800 text-xs font-bold flex items-center gap-3"><AlertCircle size={20}/> {errorMsg}</div>}
                 
-                <div className="mt-8 flex justify-end"><button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">{loading ? <Loader2 className="animate-spin" /> : <ArrowUpRight />} Lancer l'Analyse</button></div>
+                <div className="mt-8 flex justify-end">
+                  <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">
+                    {loading ? (
+                      <>
+                        <Loader2 className="animate-spin" /> 
+                        {retryCount > 0 ? `Nouvelle tentative (${retryCount})...` : "Lancement de l'Analyse..."}
+                      </>
+                    ) : (
+                      <>
+                        <ArrowUpRight /> Lancer l'Analyse
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           )}
