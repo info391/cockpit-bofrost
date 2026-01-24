@@ -6,7 +6,7 @@ import {
 import { 
   ClipboardPaste, TrendingUp, AlertCircle,
   Loader2, User, ListTodo, Scale, ChevronRight, ShieldCheck, 
-  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal
+  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Medal, Globe
 } from 'lucide-react';
 
 // --- COMPOSANTS UI ---
@@ -132,6 +132,7 @@ export default function App() {
   const [showApercu, setShowApercu] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [actionPlans, setActionPlans] = useState({});
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const apiKey = ""; 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -150,7 +151,7 @@ export default function App() {
     if (lines.length < 2) return "Période à définir";
     const headers = lines[0].split(/[|\t]/).map(h => h.trim().toLowerCase());
     const weekIdx = headers.findIndex(h => h.includes("semaine"));
-    if (weekIdx === -1) return "Semaine non détectée";
+    if (weekIdx === -1) return "Données partielles";
     const allWeeks = new Set();
     lines.slice(1).forEach(l => {
       const p = l.split(/[|\t]/);
@@ -178,7 +179,7 @@ export default function App() {
     lines.slice(1).forEach(line => {
       const p = line.split(/[|\t]/).map(v => v.trim());
       const rawName = idx.name !== -1 ? p[idx.name] : 'Inconnu';
-      if (rawName === 'Inconnu') return;
+      if (rawName === 'Inconnu' || !rawName) return;
       const normName = rawName.toLowerCase().replace(/\s/g, '');
       const weekNum = idx.semaine !== -1 && p[idx.semaine] ? p[idx.semaine].replace(/[^0-9]/g, '') : "0";
       const weekKey = `${normName}_W${weekNum}`;
@@ -225,19 +226,33 @@ export default function App() {
 
   const handleAnalyse = async () => {
     setLoading(true);
-    const system = `Tu es l'Expert Coach EMconsulting. Analyse hebdo nominative Bofrost. Cite impérativement 3 points [POS] et 3 [AMEL] globaux sous [SECTION_START]Bilan d'Agence[SECTION_END]. Puis utilise [COLLAB_START]Nom[COLLAB_END] pour chaque personne.`;
+    setErrorMsg(null);
+    const system = `Tu es l'Expert Coach EMconsulting Bofrost. 
+    TA STRUCTURE DE RÉPONSE DOIT ÊTRE STRICTE :
+    1. Commence par [SECTION_START]Synthèse Agence[SECTION_END]
+    2. Liste 3 points positifs commençant par [POS]
+    3. Liste 3 points d'amélioration commençant par [AMEL]
+    4. Pour chaque collaborateur, utilise EXACTEMENT cette balise : [COLLAB_START]Nom Complet[COLLAB_END]
+    5. Utilise [ALERT] pour les points critiques individuels.
+    CIBLE : 12 BC/jour.`;
+    
     try {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: `Analyser : \n${pastedData}` }] }],
+          contents: [{ parts: [{ text: `Analyser la performance Bofrost pour la période ${periodText} : \n${pastedData}` }] }],
           systemInstruction: { parts: [{ text: system }] }
         })
       });
       const res = await response.json();
-      setAnalysis(res.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur IA.");
+      if (res.error) throw new Error(res.error.message);
+      const text = res.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!text) throw new Error("Réponse vide de l'IA.");
+      setAnalysis(text);
       setActiveTab('analyse');
+    } catch (err) {
+      setErrorMsg("Erreur de connexion avec l'IA. Vérifiez votre connexion ou réessayez.");
     } finally { setLoading(false); }
   };
 
@@ -247,15 +262,35 @@ export default function App() {
     const lines = analysis.split('\n');
     let currentBlock = null;
     let agencySummary = { pos: [], amel: [] };
+    let hasTags = analysis.includes('[SECTION_START]') || analysis.includes('[COLLAB_START]');
 
+    // Si aucune balise n'est présente, on affiche le texte brut de manière élégante
+    if (!hasTags) {
+      return (
+        <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2rem] shadow-xl border border-amber-100 text-left">
+          <div className="flex items-center gap-3 mb-6 text-amber-600">
+            <AlertTriangle size={24} />
+            <h3 className="font-black uppercase tracking-tighter">Analyse Brute (Structure simplifiée)</h3>
+          </div>
+          <div className="whitespace-pre-wrap text-slate-700 leading-relaxed font-medium text-base">
+            {analysis}
+          </div>
+        </div>
+      );
+    }
+
+    // Parsing structuré
     lines.forEach(line => {
-      if (line.includes('[POS]')) agencySummary.pos.push(line.replace('[POS]', '').trim());
-      if (line.includes('[AMEL]')) agencySummary.amel.push(line.replace('[AMEL]', '').trim());
+      const cleanLine = line.replace(/\[UP\]|\[DOWN\]|\[STABLE\]/g, '').trim();
+      if (line.toUpperCase().includes('[POS]')) agencySummary.pos.push(cleanLine.replace(/\[POS\]/gi, '').trim());
+      if (line.toUpperCase().includes('[AMEL]')) agencySummary.amel.push(cleanLine.replace(/\[AMEL\]/gi, '').trim());
     });
 
     lines.forEach((line) => {
       const clean = line.replace(/\[UP\]|\[DOWN\]|\[STABLE\]/g, '').trim();
-      if (line.includes('[SECTION_START]')) items.push({ type: 'title', content: "Synthèse Hebdomadaire d'Agence", summary: agencySummary });
+      if (line.includes('[SECTION_START]')) {
+        items.push({ type: 'title', content: clean.replace(/\[SECTION_START\]|\[SECTION_END\]/g, ''), summary: { ...agencySummary } });
+      } 
       else if (line.includes('[COLLAB_START]')) {
         const name = clean.replace(/\[COLLAB_START\]|\[COLLAB_END\]/g, '').trim();
         currentBlock = { type: 'collaborator', name, normName: name.toLowerCase().replace(/\s/g, ''), analysis: [], badges: { up: line.includes('[UP]'), down: line.includes('[DOWN]') } };
@@ -276,9 +311,9 @@ export default function App() {
           <div key={idx} className="px-4 agency-summary-section text-left">
              <div className="flex items-center gap-4 mb-6 mt-2"><h3 className="text-lg font-black text-indigo-950 uppercase border-l-[4px] border-indigo-600 pl-4">{item.content}</h3><div className="h-px bg-slate-200 flex-1"></div></div>
              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
-                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
-                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:bg-white"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
+                <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:bg-white"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={i} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
+                <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={i} className="flex justify-between text-[11px] font-black uppercase"><span className="text-slate-500">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
              </div>
           </div>
         );
@@ -306,7 +341,8 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60">Stable Release v16.1</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60">Stable Release v16.3</p>
+          <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
           <nav className="space-y-1">
@@ -335,8 +371,9 @@ export default function App() {
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4">
               <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
                 <h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase mb-8">Données Bofrost</h3>
-                <textarea className="w-full h-80 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez ici vos lignes Sheets..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
-                <div className="mt-8 flex justify-end"><button onClick={handleAnalyse} disabled={loading || !pastedData} className="px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase">Générer l'Analyse <ArrowUpRight size={24} /></button></div>
+                <textarea className="w-full h-80 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner" placeholder="Collez vos données Sheets ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
+                {errorMsg && <div className="mt-4 p-3 bg-rose-50 text-rose-700 text-xs font-bold rounded-xl border border-rose-100">{errorMsg}</div>}
+                <div className="mt-8 flex justify-end"><button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3">{loading ? <Loader2 className="animate-spin" /> : <ArrowUpRight />} Lancer l'Analyse</button></div>
               </div>
             </div>
           )}
