@@ -237,7 +237,7 @@ export default function App() {
   };
 
   const fetchWithRetry = async (url, options, maxRetries = 3) => {
-    let lastStatusText = "";
+    let lastError = new Error("Erreur inconnue");
     for (let i = 0; i < maxRetries; i++) {
       try {
         const response = await fetch(url, options);
@@ -251,17 +251,17 @@ export default function App() {
         }
 
         if (!response.ok) {
-          throw new Error(res.error?.message || `Serveur Google : ${response.status} ${response.statusText}`);
+          throw new Error(res.error?.message || `Serveur : ${response.status}`);
         }
 
         if (!res || !res.candidates || res.candidates.length === 0) {
-          throw new Error("Réponse de l'IA incomplète.");
+          throw new Error("Réponse vide.");
         }
 
         return res;
       } catch (err) {
-        lastStatusText = err.message;
-        if (i === maxRetries - 1) throw new Error(lastStatusText);
+        lastError = err;
+        if (i === maxRetries - 1) throw lastError;
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
@@ -278,19 +278,20 @@ export default function App() {
     setRetryCount(0);
     
     const instructions = `Tu es l'Expert Coach EMconsulting Bofrost. 
-    STRUTURE OBLIGATOIRE :
+    STRUCTURE OBLIGATOIRE :
     1. Commence par [SECTION_START]Bilan Agence[SECTION_END]
     2. 3 points [POS] et 3 points [AMEL]
     3. Pour chaque collaborateur : [COLLAB_START]Nom[COLLAB_END]
-    4. CIBLE : 12 BC/jour.`;
+    CIBLE : 12 BC/jour.`;
 
-    const fullPrompt = `${instructions}\n\nDonnées à analyser :\n${pastedData}`;
+    const fullPrompt = `${instructions}\n\nDonnées :\n${pastedData}`;
 
-    // Stratégie multi-modèles avec rapports d'erreur détaillés
+    // Stratégie de modèles mise à jour pour 2024/2025
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-1.5-flash' },
-      { ver: 'v1beta', model: 'gemini-1.5-pro' },
-      { ver: 'v1', model: 'gemini-1.5-flash' }
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' },
+      { ver: 'v1beta', model: 'gemini-1.5-flash-latest' },
+      { ver: 'v1', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-pro' }
     ];
 
     let success = false;
@@ -321,7 +322,7 @@ export default function App() {
     }
 
     if (!success) {
-      setErrorMsg(`Échec de connexion. Détails techniques : \n${errors.join('\n')}`);
+      setErrorMsg(`Aucun modèle n'a répondu. Détails techniques : \n${errors.join('\n')}`);
     }
     
     setLoading(false);
@@ -397,7 +398,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40">
           <div className="flex items-center gap-3 mb-2"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.6</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic">Stable Release v17.7</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto">
