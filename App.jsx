@@ -85,7 +85,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-4 print:grid-cols-5 print:gap-1.5 print:mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-4 print:grid-cols-5 print:gap-1.5 print:mb-2 text-left">
         <RuleMiniChart title="Ratio Closings / BC" data={data} dataKey="rClosingBC" threshold={2} isMax={true} />
         <RuleMiniChart title="Ratio Prospects / Closings" data={data} dataKey="rProspClose" threshold={2} isMax={true} />
         <RuleMiniChart title="Ratio Présents / Prospects" data={data} dataKey="rPresProsp" threshold={2} isMax={true} />
@@ -137,9 +137,19 @@ export default function App() {
   const [actionPlans, setActionPlans] = useState({});
   const [errorMsg, setErrorMsg] = useState(null);
   const [diagInfo, setDiagInfo] = useState(null);
+  const [cooldown, setCooldown] = useState(0); // Compteur pour éviter le spam
+  
   const [userApiKey, setUserApiKey] = useState(localStorage.getItem('em_gemini_key') || '');
 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  // Effet pour gérer le cooldown du bouton
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
 
   // Chargement html2pdf
   useEffect(() => {
@@ -147,7 +157,7 @@ export default function App() {
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
     script.async = true;
     document.body.appendChild(script);
-    return () => { if (document.body.contains(script)) document.body.removeChild(script); };
+    return () => { if (document.body && document.body.contains(script)) document.body.removeChild(script); };
   }, []);
 
   const periodText = useMemo(() => {
@@ -236,55 +246,62 @@ export default function App() {
     localStorage.setItem('em_gemini_key', cleanKey);
   };
 
-  // --- LOGIQUE API STABILISÉE (SANS RETRY) ---
-  
   const handleAnalyse = async () => {
     if (!userApiKey) { setActiveTab('config'); return; }
-    if (loading) return;
+    if (loading || cooldown > 0) return;
     
     setLoading(true);
     setErrorMsg(null);
     
-    const instructions = `Tu es l'Expert Coach EMconsulting Bofrost spécialisé dans l'analyse de performance.
-    STRUTURE OBLIGATOIRE :
-    1. Commence par [SECTION_START]Bilan d'Agence[SECTION_END]
-    2. Liste ensuite 3 points positifs [POS] et 3 d'amélioration [AMEL]
-    3. Pour chaque collaborateur, utilise : [COLLAB_START]Nom Complet[COLLAB_END]
-    CIBLE : 12 BC/jour.
-    DONNÉES : \n${pastedData}`;
+    // Simplification extrême pour limiter les jetons
+    const instructions = `Expert Coach Bofrost. Analyser :
+    1. [SECTION_START]Bilan d'Agence[SECTION_END] avec 3 [POS] et 3 [AMEL].
+    2. Pour chaque collaborateur : [COLLAB_START]Nom Complet[COLLAB_END] puis 2 phrases courtes.
+    Cible: 12 BC/jour. Données : \n${pastedData}`;
 
-    // On cible le modèle qui a répondu au diagnostic
-    const model = 'gemini-2.0-flash'; 
+    // On priorise gemini-1.5-flash qui a souvent des quotas plus souples
+    const attempts = [
+      { ver: 'v1beta', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash' }
+    ];
 
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${userApiKey}`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: instructions }] }] })
-      });
+    let success = false;
+    let errors = [];
 
-      const res = await response.json();
-      
-      if (response.status === 429) {
-        throw new Error(`QUOTA ÉPUISÉ : Google limite l'usage gratuit. Veuillez attendre 60 secondes avant de réessayer.`);
+    for (const config of attempts) {
+      if (success) break;
+      try {
+        const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: instructions }] }] })
+        });
+
+        if (response.status === 429) {
+          setCooldown(60); // On force une attente de 60s
+          throw new Error(`QUOTA ÉPUISÉ : Google bloque l'accès temporairement. Veuillez patienter pendant le décompte du bouton.`);
+        }
+
+        const res = await response.json();
+        if (!response.ok) throw new Error(res?.error?.message || `Erreur ${response.status}`);
+
+        const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          setAnalysis(text);
+          setActiveTab('analyse');
+          success = true;
+          setErrorMsg(null);
+        }
+      } catch (err) {
+        errors.push(err.message);
       }
-
-      if (!response.ok) throw new Error(res?.error?.message || `Erreur serveur ${response.status}`);
-
-      const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) {
-        setAnalysis(text);
-        setActiveTab('analyse');
-        setErrorMsg(null);
-      } else {
-        throw new Error("Réponse de l'IA vide ou filtrée.");
-      }
-    } catch (err) {
-      setErrorMsg(String(err.message));
-    } finally {
-      setLoading(false);
     }
+
+    if (!success) {
+      setErrorMsg(errors[0]);
+    }
+    setLoading(false);
   };
 
   const auditContent = useMemo(() => {
@@ -337,7 +354,7 @@ export default function App() {
     setIsExporting(true);
     const element = document.getElementById('print-area');
     window.html2pdf().from(element).set({
-      margin: 5, filename: `Audit_Bofrost_${todayDate.replace(/\s/g, '_')}.pdf`,
+      margin: 5, filename: `Audit_Executive_Bofrost_${todayDate.replace(/\s/g, '_')}.pdf`,
       image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 1.5, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' },
       pagebreak: { mode: ['css', 'legacy'], after: '.agency-summary-section', avoid: '.page-collaborator' }
     }).save().then(() => setIsExporting(false));
@@ -365,7 +382,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40 text-left">
           <div className="flex items-center gap-3 mb-2 text-left"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg text-left"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none text-left">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v22.4</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v23.0</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest text-left"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left">
@@ -389,11 +406,15 @@ export default function App() {
           {activeTab === 'import' && (
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 text-left">
               <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left text-left">
-                <div className="flex items-center gap-6 mb-8 text-left text-left"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl text-left"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none text-left text-left">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic uppercase tracking-wider text-left text-left">Copier-coller le tableau Looker Studio ici</p></div></div>
+                <div className="flex items-center gap-6 mb-8 text-left text-left"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl text-left text-left"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none text-left text-left">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic uppercase tracking-wider text-left text-left">Copier-coller le tableau Looker Studio ici</p></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner text-left" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 <div className="mt-8 flex justify-end text-left">
-                  <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3 active:scale-95 cursor-pointer text-left">
-                    {loading ? <><Loader2 className="animate-spin" /> Analyse...</> : <><ArrowUpRight /> Lancer l'Analyse</>}
+                  <button 
+                    onClick={handleAnalyse} 
+                    disabled={loading || !pastedData || cooldown > 0} 
+                    className={`group px-10 py-4 rounded-xl font-black text-base shadow-2xl transition-all uppercase flex items-center gap-3 active:scale-95 cursor-pointer text-left ${cooldown > 0 ? 'bg-slate-200 text-slate-400 cursor-not-allowed' : 'bg-indigo-600 text-white hover:bg-indigo-700'}`}
+                  >
+                    {loading ? <><Loader2 className="animate-spin" /> Calcul Audit...</> : (cooldown > 0 ? `Attendre ${cooldown}s` : <><ArrowUpRight /> Lancer l'Analyse</>)}
                   </button>
                 </div>
               </div>
