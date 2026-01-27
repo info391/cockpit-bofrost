@@ -75,7 +75,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
           <div className="flex items-center gap-4 text-left">
             <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black italic text-lg shadow-lg">{name.charAt(0)}</div>
             <div className="text-left">
-              <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1 print:text-base">{name}</h4>
+              <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1 print:text-base text-left">{name}</h4>
               <div className="flex gap-2 text-left">
                 {badges?.up && <TrendBadge type="up" small />}
                 {badges?.down && <TrendBadge type="down" small />}
@@ -93,7 +93,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
         <RuleMiniChart title="Moyenne BC / Jour" data={data} dataKey="valBC" threshold={12} isMax={false} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-        <div className="bg-indigo-50/20 rounded-xl p-4 border border-indigo-100/30 relative text-left print:p-2 print:border-none print:bg-white text-left text-left">
+        <div className="bg-indigo-50/20 rounded-xl p-4 border border-indigo-100/30 relative text-left print:p-2 print:border-none print:bg-white text-left">
           <h5 className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic print:text-[7px] text-left uppercase">Diagnostic IA</h5>
           <div className="space-y-2.5 text-left">
             {analysisItems?.map((line, lIdx) => (
@@ -251,19 +251,24 @@ export default function App() {
     setLoading(true);
     setErrorMsg(null);
     
-    const instructions = `Expert Coach Bofrost. Analyser :
-    1. [SECTION_START]Bilan d'Agence[SECTION_END] avec 3 [POS] et 3 [AMEL].
-    2. Pour chaque collaborateur : [COLLAB_START]Nom Complet[COLLAB_END] puis 2 phrases courtes.
-    Cible: 12 BC/jour. Données : \n${pastedData}`;
+    // NETTOYAGE DES DONNÉES : On retire le superflu pour économiser le quota (Tokens)
+    const dataRows = pastedData.split('\n')
+      .filter(l => l.trim().length > 5 && !l.includes("Nom du collaborateur"))
+      .map(l => l.replace(/\t/g, '|'))
+      .join('\n');
 
-    // MISE À JOUR : On utilise uniquement les modèles validés par le diagnostic
+    const instructions = `Coach Bofrost. Analyser :
+    1. [SECTION_START]Bilan d'Agence[SECTION_END] : 3 [POS] et 3 [AMEL].
+    2. Pour chaque collaborateur : [COLLAB_START]Nom Complet[COLLAB_END] puis 1 conseil court.
+    Données : \n${dataRows}`;
+
     const attempts = [
       { ver: 'v1beta', model: 'gemini-2.5-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash' }
     ];
 
     let success = false;
-    let errors = [];
+    let errorDetail = "";
 
     for (const config of attempts) {
       if (success) break;
@@ -277,7 +282,7 @@ export default function App() {
 
         if (response.status === 429) {
           setCooldown(60); 
-          throw new Error(`QUOTA ÉPUISÉ : Google bloque l'accès temporairement. Veuillez patienter 60s.`);
+          throw new Error(`QUOTA ÉPUISÉ : Veuillez patienter 60s avant le prochain essai.`);
         }
 
         const res = await response.json();
@@ -291,12 +296,12 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        errors.push(err.message);
+        errorDetail = err.message;
       }
     }
 
     if (!success) {
-      setErrorMsg(errors[0]);
+      setErrorMsg(errorDetail);
     }
     setLoading(false);
   };
@@ -379,7 +384,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40 text-left">
           <div className="flex items-center gap-3 mb-2 text-left"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg text-left"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none text-left">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v23.1</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v23.2</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest text-left"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left">
