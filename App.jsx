@@ -43,7 +43,7 @@ const RuleMiniChart = ({ title, data, dataKey, threshold, isMax = true }) => (
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data}>
           <defs>
-            <linearGradient id={`grad-${dataKey}-${title.length}`} x1="0" y1="0" x2="0" y2="1">
+            <linearGradient id={`grad-${dataKey}-${title.replace(/\s+/g, '')}`} x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
               <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
             </linearGradient>
@@ -52,7 +52,7 @@ const RuleMiniChart = ({ title, data, dataKey, threshold, isMax = true }) => (
           <XAxis dataKey="weekLabel" hide />
           <YAxis hide domain={[0, (dataMax) => Math.max(dataMax * 1.2, threshold * 1.2)]} />
           <ReferenceLine y={threshold} stroke={isMax ? "#f43f5e" : "#10b981"} strokeDasharray="3 3" strokeWidth={1} />
-          <Area type="monotone" dataKey={dataKey} stroke="#6366f1" strokeWidth={1.5} fill={`url(#grad-${dataKey}-${title.length})`} isAnimationActive={false} />
+          <Area type="monotone" dataKey={dataKey} stroke="#6366f1" strokeWidth={1.5} fill={`url(#grad-${dataKey}-${title.replace(/\s+/g, '')})`} isAnimationActive={false} />
         </AreaChart>
       </ResponsiveContainer>
     </div>
@@ -95,11 +95,11 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
           <div className="space-y-2.5 text-left">
             {analysisItems?.map((line, lIdx) => (
               line.type === 'alert' ? (
-                <div key={lIdx} className="p-2 bg-rose-50 rounded-lg text-rose-800 text-[11px] font-bold flex items-center gap-2 border border-rose-100 text-left">
+                <div key={`alert-${lIdx}`} className="p-2 bg-rose-50 rounded-lg text-rose-800 text-[11px] font-bold flex items-center gap-2 border border-rose-100 text-left">
                   <AlertTriangle size={14} className="shrink-0"/> {String(line.content)}
                 </div>
               ) : (
-                <p key={lIdx} className="text-slate-700 text-sm font-medium leading-relaxed print:text-[11px] text-left">
+                <p key={`text-${lIdx}`} className="text-slate-700 text-sm font-medium leading-relaxed print:text-[11px] text-left">
                   {String(line.content)}
                 </p>
               )
@@ -112,7 +112,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
             {actionPlan ? (
               <p className="text-emerald-950 text-sm font-bold leading-relaxed italic print:text-[11px] text-left">{String(actionPlan)}</p>
             ) : (
-              <p className="text-slate-300 text-xs italic text-left">Saisissez des objectifs spécifiques pour ce collaborateur.</p>
+              <p className="text-slate-300 text-xs italic text-left">Saisissez des objectifs pour cette période.</p>
             )}
           </div>
         </div>
@@ -224,8 +224,8 @@ export default function App() {
   }, [processedDataMap]);
 
   useEffect(() => {
-    const values = Object.values(processedDataMap);
-    if (values.length > 0) setCollaborators(values.map(c => c.name));
+    const names = Object.values(processedDataMap).map(c => c.name);
+    if (names.length > 0) setCollaborators(names);
   }, [processedDataMap]);
 
   const saveApiKey = (key) => {
@@ -242,13 +242,12 @@ export default function App() {
     const instructions = `Tu es l'Expert Coach EMconsulting Bofrost spécialisé dans l'analyse de performance.
     STRUTURE OBLIGATOIRE :
     1. Commence par [SECTION_START]Bilan d'Agence[SECTION_END]
-    2. Liste 3 points positifs [POS] et 3 d'amélioration [AMEL]
+    2. Liste ensuite 3 points positifs [POS] et 3 d'amélioration [AMEL]
     3. Pour chaque collaborateur, utilise : [COLLAB_START]Nom Complet[COLLAB_END]
     CIBLE : 12 BC/jour.
     DONNÉES : \n${pastedData}`;
 
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-2.5-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash-exp' }
     ];
@@ -267,6 +266,11 @@ export default function App() {
         });
 
         const res = await response.json();
+        
+        if (response.status === 429) {
+          throw new Error(`QUOTA ÉPUISÉ : Google limite votre clé gratuite. Attendez au moins 30 secondes avant de réessayer.`);
+        }
+
         if (!response.ok) throw new Error(res?.error?.message || `Erreur ${response.status}`);
 
         const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -277,12 +281,12 @@ export default function App() {
           setErrorMsg(null);
         }
       } catch (err) {
-        errors.push(`${config.model} : ${err.message}`);
+        errors.push(err.message);
       }
     }
 
     if (!success) {
-      setErrorMsg(`Échec de l'Analyse. Réponses de Google :\n${errors.join('\n')}`);
+      setErrorMsg(errors[0]);
     }
     setLoading(false);
   };
@@ -350,13 +354,13 @@ export default function App() {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${userApiKey}`);
       const res = await response.json();
       if (res.error) {
-        setDiagInfo(`ERREUR API : ${res.error.message}\nStatut : ${res.error.status}`);
+        setDiagInfo(`ERREUR API : ${res.error.message}`);
       } else {
         const names = res.models.map(m => m.name.replace('models/', ''));
-        setDiagInfo(`SUCCÈS ! Modèles actifs : ${names.slice(0,10).join(', ')}...`);
+        setDiagInfo(`MODÈLES ACTIFS : ${names.slice(0,10).join(', ')}...`);
       }
     } catch (e) {
-      setDiagInfo(`ÉCHEC RÉSEAU : ${e.message}`);
+      setDiagInfo(`ÉCHEC RÉSEAU`);
     }
   };
 
@@ -365,11 +369,11 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40 text-left">
           <div className="flex items-center gap-3 mb-2 text-left"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg text-left"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none text-left">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v22.1</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v22.3</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest text-left"><Globe size={10}/> Production</div>
         </div>
-        <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left text-left">
-          <nav className="space-y-1 text-left text-left text-left">
+        <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left">
+          <nav className="space-y-1 text-left">
             <SidebarLink active={activeTab === 'import'} onClick={() => setActiveTab('import')} icon={<ClipboardPaste size={16}/>} label="Source de Données" />
             <SidebarLink active={activeTab === 'analyse'} onClick={() => setActiveTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Performance" disabled={!analysis} />
             <SidebarLink active={activeTab === 'plans'} onClick={() => setActiveTab('plans')} icon={<ListTodo size={16}/>} label="Directives Coaching" disabled={collaborators.length === 0} />
@@ -379,7 +383,7 @@ export default function App() {
       </aside>
       <main className="flex-1 flex flex-col overflow-hidden relative text-left">
         <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 print:hidden text-left">
-          <div className="flex flex-col text-left"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic text-left">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest text-left">Audit Stratégique</p></div>
+          <div className="flex flex-col text-left"><h2 className="text-lg font-black text-slate-900 tracking-tight uppercase leading-none italic text-left">Analyse du {todayDate}</h2><p className="text-[10px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest text-left">{periodText}</p></div>
           <div className="flex items-center gap-4 text-left">
              <button onClick={() => setShowApercu(true)} className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg font-black uppercase text-[9px] hover:bg-indigo-700 transition-all shadow-lg cursor-pointer active:scale-95 text-left" disabled={!analysis}><Eye size={14}/> Aperçu PDF</button>
              <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-400 shadow-inner text-left"><User size={18}/></div>
@@ -388,12 +392,12 @@ export default function App() {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar print:p-0 text-left">
           {activeTab === 'import' && (
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 text-left">
-              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left text-left">
+              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
                 <div className="flex items-center gap-6 mb-8 text-left"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl text-left"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none text-left text-left">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic uppercase tracking-wider text-left text-left">Copier-coller le tableau Looker Studio ici</p></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner text-left" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 <div className="mt-8 flex justify-end text-left">
                   <button onClick={handleAnalyse} disabled={loading || !pastedData} className="group px-10 py-4 bg-indigo-600 text-white rounded-xl font-black text-base shadow-2xl hover:bg-indigo-700 transition-all uppercase flex items-center gap-3 active:scale-95 cursor-pointer text-left">
-                    {loading ? <><Loader2 className="animate-spin" /> Calcul IA...</> : <><ArrowUpRight /> Lancer l'Analyse</>}
+                    {loading ? <><Loader2 className="animate-spin" /> Calcul Audit...</> : <><ArrowUpRight /> Lancer l'Analyse</>}
                   </button>
                 </div>
               </div>
@@ -426,7 +430,7 @@ export default function App() {
                      </div>
                      <div className="pt-4 border-t border-slate-100 text-left text-left">
                         <button onClick={runDiagnostic} className="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-[10px] font-black uppercase transition-all shadow-sm text-left">
-                           <Activity size={14}/> Diagnostic Clé
+                           <Activity size={14}/> Lancer le Diagnostic Clé
                         </button>
                         {diagInfo && <div className="mt-3 p-3 bg-slate-900 text-emerald-400 font-mono text-[9px] rounded-lg border border-slate-800 break-words leading-relaxed whitespace-pre-wrap text-left">{String(diagInfo)}</div>}
                         {errorMsg && <div className="mt-3 p-3 bg-rose-900 text-rose-100 font-mono text-[9px] rounded-lg border border-rose-800 break-words leading-relaxed whitespace-pre-wrap text-left">{String(errorMsg)}</div>}
@@ -438,13 +442,24 @@ export default function App() {
         </div>
       </main>
       {showApercu && (
-        <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-md flex flex-col items-center p-4 overflow-hidden text-left text-left text-left">
-           <div className="w-full max-w-7xl flex items-center justify-between mb-3 text-white px-2 text-left">
-              <div className="flex items-center gap-3 text-left"><div className="p-2 bg-indigo-600 rounded-lg text-left"><Eye size={18}/></div><div><h3 className="text-lg font-black uppercase tracking-widest leading-none italic tracking-tighter text-left">Rapport Prêt pour Diffusion</h3></div></div>
-              <div className="flex items-center gap-4 text-left"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50 tracking-tighter cursor-pointer text-left">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer text-left"><X size={24}/></button></div>
+        <div className="fixed inset-0 z-[100] bg-slate-950/95 backdrop-blur-md flex flex-col items-center p-4 overflow-hidden text-left">
+           <div className="w-full max-w-7xl flex items-center justify-between mb-3 text-white px-2">
+              <div className="flex items-center gap-3"><div className="p-2 bg-indigo-600 rounded-lg"><Eye size={18}/></div><div><h3 className="text-lg font-black uppercase tracking-widest leading-none italic tracking-tighter">Rapport Prêt pour Diffusion</h3></div></div>
+              <div className="flex items-center gap-4"><button onClick={exportToPDF} disabled={isExporting} className="px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-black rounded-xl flex items-center gap-3 shadow-2xl text-base uppercase disabled:opacity-50 tracking-tighter cursor-pointer">{isExporting ? <Loader2 className="animate-spin" size={18}/> : <FileDown size={22}/>} {isExporting ? "Calcul..." : "Télécharger PDF"}</button><button onClick={() => setShowApercu(false)} className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-all cursor-pointer"><X size={24}/></button></div>
            </div>
            <div className="flex-1 w-full bg-slate-800 rounded-2xl overflow-y-auto p-6 shadow-inner text-left">
-              <div className="bg-white mx-auto shadow-2xl print-wrapper text-left" style={{ width: '280mm' }} id="print-area"><div className="p-10 text-left"><div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100 text-left"><ShieldCheck size={32} className="text-indigo-600"/><div className="flex flex-col text-left"><h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none italic text-left">Audit Stratégique Hebdomadaire - {todayDate}</h1><p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic tracking-widest text-left">Dossiers de Performance EMconsulting</p></div></div>{auditContent}</div></div>
+              <div className="bg-white mx-auto shadow-2xl print-wrapper text-left" style={{ width: '280mm' }} id="print-area">
+                <div className="p-10 text-left">
+                  <div className="flex items-center gap-4 mb-4 pb-4 border-b border-slate-100 text-left">
+                    <ShieldCheck size={32} className="text-indigo-600"/>
+                    <div className="flex flex-col text-left">
+                      <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none italic">Audit Stratégique Hebdomadaire - {todayDate}</h1>
+                      <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.4em] mt-1 italic tracking-widest">Dossiers de Performance EMconsulting</p>
+                    </div>
+                  </div>
+                  {auditContent}
+                </div>
+              </div>
            </div>
         </div>
       )}
