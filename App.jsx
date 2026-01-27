@@ -69,11 +69,11 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
     <div className="mb-4 bg-white p-6 rounded-[2rem] border border-slate-100 shadow-md overflow-hidden relative page-collaborator print:mb-0 print:border-none print:shadow-none print:p-0 text-left">
       <div className="bg-slate-50/30 -mx-6 -mt-6 p-4 border-b border-slate-100 mb-4 print:bg-white print:p-1 print:mb-2 text-left">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 text-left">
             <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black italic text-lg shadow-lg">{name.charAt(0)}</div>
-            <div>
-              <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1 print:text-base">{name}</h4>
-              <div className="flex gap-2">
+            <div className="text-left">
+              <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1 print:text-base text-left">{name}</h4>
+              <div className="flex gap-2 text-left">
                 {badges?.up && <TrendBadge type="up" small />}
                 {badges?.down && <TrendBadge type="down" small />}
                 {badges?.stable && <TrendBadge type="stable" small />}
@@ -82,7 +82,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
           </div>
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-4 print:grid-cols-5 print:gap-1.5 print:mb-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 mb-4 print:grid-cols-5 print:gap-1.5 print:mb-2 text-left">
         <RuleMiniChart title="Ratio Closings / BC" data={data} dataKey="rClosingBC" threshold={2} isMax={true} />
         <RuleMiniChart title="Ratio Prospects / Closings" data={data} dataKey="rProspClose" threshold={2} isMax={true} />
         <RuleMiniChart title="Ratio Présents / Prospects" data={data} dataKey="rPresProsp" threshold={2} isMax={true} />
@@ -247,26 +247,42 @@ export default function App() {
     CIBLE : 12 BC/jour.
     DONNÉES : \n${pastedData}`;
 
-    try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`;
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ contents: [{ parts: [{ text: instructions }] }] })
-      });
+    const attempts = [
+      { ver: 'v1beta', model: 'gemini-2.5-flash' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash' },
+      { ver: 'v1beta', model: 'gemini-2.0-flash-exp' }
+    ];
 
-      const res = await response.json();
-      if (!response.ok) throw new Error(res?.error?.message || `Erreur ${response.status}`);
+    let success = false;
+    let errors = [];
 
-      const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) {
-        setAnalysis(text);
-        setActiveTab('analyse');
-      } else {
-        throw new Error("Réponse vide de Google.");
+    for (const config of attempts) {
+      if (success) break;
+      try {
+        const url = `https://generativelanguage.googleapis.com/${config.ver}/models/${config.model}:generateContent?key=${userApiKey}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contents: [{ parts: [{ text: instructions }] }] })
+        });
+
+        const res = await response.json();
+        if (!response.ok) throw new Error(res?.error?.message || `Erreur ${response.status}`);
+
+        const text = res?.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          setAnalysis(text);
+          setActiveTab('analyse');
+          success = true;
+          setErrorMsg(null);
+        }
+      } catch (err) {
+        errors.push(`${config.model} : ${err.message}`);
       }
-    } catch (err) {
-      setErrorMsg(String(err.message));
+    }
+
+    if (!success) {
+      setErrorMsg(`Échec de l'Analyse. Réponses de Google :\n${errors.join('\n')}`);
     }
     setLoading(false);
   };
@@ -307,7 +323,7 @@ export default function App() {
            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={`pos-${i}`} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
               <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={`amel-${i}`} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
-              <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={`rank-${i}`} className="flex justify-between text-[11px] font-black uppercase text-left"><span className="text-slate-500 text-left">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
+              <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left text-left text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={`rank-${i}`} className="flex justify-between text-[11px] font-black uppercase text-left"><span className="text-slate-500 text-left">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
            </div>
         </div>
       );
@@ -337,7 +353,7 @@ export default function App() {
         setDiagInfo(`ERREUR API : ${res.error.message}\nStatut : ${res.error.status}`);
       } else {
         const names = res.models.map(m => m.name.replace('models/', ''));
-        setDiagInfo(`SUCCÈS ! Modèles actifs : ${names.slice(0,5).join(', ')}...`);
+        setDiagInfo(`SUCCÈS ! Modèles actifs : ${names.slice(0,10).join(', ')}...`);
       }
     } catch (e) {
       setDiagInfo(`ÉCHEC RÉSEAU : ${e.message}`);
@@ -349,11 +365,11 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40 text-left">
           <div className="flex items-center gap-3 mb-2 text-left"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg text-left"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none text-left">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v21.1</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v22.1</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest text-left"><Globe size={10}/> Production</div>
         </div>
-        <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left">
-          <nav className="space-y-1 text-left">
+        <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left text-left">
+          <nav className="space-y-1 text-left text-left text-left">
             <SidebarLink active={activeTab === 'import'} onClick={() => setActiveTab('import')} icon={<ClipboardPaste size={16}/>} label="Source de Données" />
             <SidebarLink active={activeTab === 'analyse'} onClick={() => setActiveTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Performance" disabled={!analysis} />
             <SidebarLink active={activeTab === 'plans'} onClick={() => setActiveTab('plans')} icon={<ListTodo size={16}/>} label="Directives Coaching" disabled={collaborators.length === 0} />
@@ -372,7 +388,7 @@ export default function App() {
         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar print:p-0 text-left">
           {activeTab === 'import' && (
             <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 text-left">
-              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left">
+              <div className="bg-white rounded-[2rem] p-10 shadow-xl border border-slate-100 relative overflow-hidden text-left text-left">
                 <div className="flex items-center gap-6 mb-8 text-left"><div className="bg-indigo-600 p-4 rounded-xl text-white shadow-2xl text-left"><ClipboardPaste size={28}/></div><div><h3 className="text-2xl font-black tracking-tighter text-slate-950 uppercase leading-none text-left text-left">Données Bofrost</h3><p className="text-xs font-bold text-slate-400 mt-2 italic uppercase tracking-wider text-left text-left">Copier-coller le tableau Looker Studio ici</p></div></div>
                 <textarea className="w-full h-64 p-6 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-[10px] font-mono shadow-inner text-left" placeholder="Collez vos données ici..." value={pastedData} onChange={(e) => setPastedData(e.target.value)}/>
                 <div className="mt-8 flex justify-end text-left">
