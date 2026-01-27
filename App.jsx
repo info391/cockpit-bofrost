@@ -4,7 +4,7 @@ import {
 } from 'recharts';
 import { 
   ClipboardPaste, TrendingUp, AlertCircle, Loader2, User, ListTodo, ShieldCheck, 
-  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Activity, Database, Settings, Scale, Brain, Calendar, MessageSquareText, Hash, Printer, Users, CheckCircle2, ExternalLink, Filter, Check, ChevronDown, Download, Trash2, TrendingDown, Minus, Building2
+  ArrowUpRight, AlertTriangle, LayoutDashboard, X, Eye, FileDown, ThumbsUp, Activity, Database, Settings, Scale, Brain, Calendar, MessageSquareText, Hash, Printer, Users, CheckCircle2, ExternalLink, Filter, Check, ChevronDown, Download, Trash2, TrendingDown, Minus, Building2, UserCog
 } from 'lucide-react';
 
 // --- CONSTANTES DE STYLE ---
@@ -280,7 +280,7 @@ export default function App() {
       attendance: agS.totD > 0 ? Math.round((agS.attD / agS.totD) * 100) : 0
     };
 
-    const range = `${selectedMonths.length > 0 ? selectedMonths.join(', ') : 'Toute la période'} | ${selectedWeeks.length > 0 ? selectedWeeks.join(', ') : 'Toutes semaines'}`;
+    const range = `${selectedMonths.length > 0 ? selectedMonths.join(', ') : 'Période : '} | ${selectedWeeks.length > 0 ? selectedWeeks.join(', ') : 'Toutes semaines'}`;
     return { count: collabs.length, collabs, agencyAvg, range };
   }, [rawDataEntries, selectedMonths, selectedWeeks]);
 
@@ -297,7 +297,7 @@ export default function App() {
 
   const handlePrint = () => {
     const win = window.open('', '_blank');
-    if (!win) { alert("Autorisez les pop-ups pour imprimer."); return; }
+    if (!win) { alert("Pop-ups bloqués."); return; }
     const html = document.getElementById('print-area').innerHTML;
     const styles = document.head.innerHTML;
     win.document.write(`<html><head>${styles}<style>
@@ -328,43 +328,43 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans text-left text-sm">
-      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left">
+      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left text-left text-left">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white rounded-xl shadow-lg"><ShieldCheck className="text-[#0033a0]" size={20} /></div>
-          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase">v51.1 Stable</span></div>
+          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left">v52.0 Centralisé</span></div>
         </div>
         <nav className="flex flex-col gap-1.5">
           <SidebarLink active={tab==='import'} onClick={()=>setTab('import')} icon={<Database size={16}/>} label="Source de données" />
           <SidebarLink active={tab==='analyse'} onClick={()=>setTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Stratégique" disabled={Object.keys(analysisResults).length === 0}/>
-          <SidebarLink active={tab==='config'} onClick={()=>setTab('config')} icon={<Settings size={16}/>} label="Directives Coaching" />
+          <SidebarLink active={tab==='config'} onClick={()=>setTab('config')} icon={<ListTodo size={16}/>} label="Directives Coaching" />
         </nav>
         <div className="mt-auto pt-6 border-t border-white/10 text-left text-left">
           <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2"><Scale size={12}/> Seuils Cibles</h3>
-          <div className="space-y-1.5 text-left">
+          <div className="space-y-1.5 text-left text-left">
             <RuleItem label="Porte / Pres" target="≤ 3" /><RuleItem label="Pres / Prosp" target="≤ 2" /><RuleItem label="Prosp / Close" target="≤ 2" /><RuleItem label="Close / BC" target="≤ 2" /><RuleItem label="Volume BC / J" target="≥ 12" /><RuleItem label="Taux Présence" target="100%" />
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left text-left text-left text-left text-left">
-        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left">
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left text-left text-left">
+        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left text-left">
           <div className="flex items-center gap-4 text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0]">Dashboard du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">v51.1 - Fix</span>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">Coaching v52</span>
           </div>
           <div className="flex gap-2">
-            {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all"><Trash2 size={18}/></button>}
+            {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all text-left"><Trash2 size={18}/></button>}
             <button onClick={()=>setShowPdf(true)} disabled={Object.keys(analysisResults).length === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left"><Eye size={14}/> Aperçu & Impression</button>
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 print:p-0 text-left">
+        <div className="flex-1 overflow-y-auto p-8 print:p-0">
           {tab === 'import' && (
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left">
               <div className={cardClass}>
-                <div className="flex items-center gap-3 mb-6"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900">Import des données</h3></div>
-                <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
+                <div className="flex items-center gap-3 mb-6 text-left"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left">Import des données</h3></div>
+                <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
                 {rawDataEntries.length > 0 && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 animate-in slide-in-from-top-4 text-left">
                     <MultiSelectDropdown label="Filtrer par Mois" options={availableFilters.months} selected={selectedMonths} onToggle={(v)=>toggle(v, selectedMonths, setSelectedMonths)} icon={Filter}/>
@@ -373,9 +373,9 @@ export default function App() {
                 )}
                 <div className="mt-8 flex items-center justify-between pt-6 border-t border-slate-100 text-left text-left">
                   <div className="flex gap-10">
-                    <div className="flex flex-col"><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">Agents détectés</span><span className="text-2xl font-black text-slate-900 leading-none">{dataSummary.count} <User className="inline text-[#0033a0]" size={18}/></span></div>
+                    <div className="flex flex-col text-left"><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 text-left">Agents détectés</span><span className="text-2xl font-black text-slate-900 leading-none text-left">{dataSummary.count} <User className="inline text-[#0033a0]" size={18}/></span></div>
                     <div className="h-10 w-px bg-slate-100 text-left"></div>
-                    <div className="flex flex-col"><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 text-left text-left">Statut</span><span className="text-sm font-black text-[#0033a0] leading-none uppercase italic">Prêt</span></div>
+                    <div className="flex flex-col text-left"><span className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1 text-left">Statut</span><span className="text-sm font-black text-[#0033a0] leading-none uppercase italic text-left">Prêt</span></div>
                   </div>
                   <button onClick={handleAnalyse} disabled={loading || dataSummary.count === 0} className="px-12 py-5 bg-[#0033a0] text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all uppercase">Générer l'Audit</button>
                 </div>
@@ -384,7 +384,7 @@ export default function App() {
           )}
 
           {tab === 'analyse' && (
-            <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left text-left">
+            <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left">
               {/* BILAN AGENCE */}
               <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left">
                 <div className="flex items-center gap-4 mb-8">
@@ -406,18 +406,18 @@ export default function App() {
                       {agencyAudit.map((item, i) => (
                         <div key={`agency-item-${i}`} className={`p-4 rounded-2xl border flex items-start gap-3 transition-all ${item.met ? 'bg-white/10 border-white/20' : 'bg-rose-500/20 border-rose-500/30'}`}>
                            <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${item.met ? 'bg-emerald-400' : 'bg-rose-400'}`}></div>
-                           <div className="text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
+                           <div className="text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
                         </div>
                       ))}
                     </div>
                   </div>
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6">
                      <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left"><ThumbsUp size={14}/> Directives Agence</div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px]">
+                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] text-left">
                         {agencyComment ? (
                            <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left">{agencyComment}</p>
                         ) : (
-                           <p className="text-blue-200/50 text-xs italic text-left">Rédigez vos directives globales dans l'onglet réglages.</p>
+                           <p className="text-blue-200/50 text-xs italic text-left">Rédigez vos directives globales dans l'onglet Directives Coaching.</p>
                         )}
                      </div>
                   </div>
@@ -427,11 +427,11 @@ export default function App() {
               {/* COLLABORATEURS */}
               {dataSummary.collabs.map((c) => (
                 <div key={`collab-card-${c.name}`} className={cardClass}>
-                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left">
+                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left">
                     <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl">{c.name[0]}</div>
                     <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left">{c.name}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} isAverage={true} />
                     <StatBox label="Pres / Prosp" value={c.averages.rPresProsp} threshold={2} isAverage={true} />
                     <StatBox label="Prosp / Cl" value={c.averages.rProspClose} threshold={2} isAverage={true} />
@@ -439,21 +439,21 @@ export default function App() {
                     <StatBox label="BC / J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} />
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left text-left">
                     <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left">
-                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left"><Activity size={14}/> Diagnostic Nominatif</div>
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
                       <div className="space-y-4">
                         {(analysisResults[c.name] || []).map((item, i) => (
                           <div key={`diag-collab-${c.name}-${i}`} className={`p-4 rounded-2xl border flex items-start gap-3 transition-all ${item.met ? 'bg-white border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
                             <div className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${item.met ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                            <div><span className="text-[8px] font-black uppercase opacity-40 block text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic text-left leading-relaxed">{item.numericalDetail}</p></div>
+                            <div><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic text-left text-left text-left leading-relaxed">{item.numericalDetail}</p></div>
                           </div>
                         ))}
                       </div>
                     </div>
-                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left">
-                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left"><ThumbsUp size={14}/> Directives Manager</div>
-                      <textarea className="w-full h-full min-h-[300px] bg-transparent border-none outline-none text-emerald-950 font-bold placeholder:text-emerald-300 resize-none italic text-base text-left" value={managerComments[c.name] || ''} onChange={(e) => setManagerComments({...managerComments, [c.name]: e.target.value})} placeholder="Saisissez ici vos conseils personnalisés..."/>
+                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
+                      <textarea className="w-full h-full min-h-[300px] bg-transparent border-none outline-none text-emerald-950 font-bold placeholder:text-emerald-300 resize-none italic text-base text-left text-left text-left" value={managerComments[c.name] || ''} onChange={(e) => setManagerComments({...managerComments, [c.name]: e.target.value})} placeholder="Saisissez ici vos conseils personnalisés..."/>
                     </div>
                   </div>
                 </div>
@@ -463,23 +463,52 @@ export default function App() {
 
           {tab === 'config' && (
             <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left">
+              {/* DIRECTIVE AGENCE */}
               <div className={cardClass}>
                  <div className="flex items-center gap-4 mb-8">
                     <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0]">Commentaires Agence</h3>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left">Directives Agence Globales</h3>
                  </div>
                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Message global (Page 1 du rapport)</label>
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-left">Message global pour l'équipe (Page 1 du rapport)</label>
                     <textarea 
-                      className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:border-[#0033a0] outline-none text-base font-bold text-slate-700 leading-relaxed italic shadow-inner" 
-                      placeholder="Saisissez ici les objectifs globaux..." 
+                      className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-3xl focus:border-[#0033a0] outline-none text-base font-bold text-slate-700 leading-relaxed italic shadow-inner text-left" 
+                      placeholder="Saisissez ici les objectifs globaux, les félicitations collectives ou les axes stratégiques du moment..." 
                       value={agencyComment}
                       onChange={(e) => setAgencyComment(e.target.value)}
                     />
                  </div>
               </div>
-              <div className="p-6 bg-slate-50/50 rounded-3xl border border-blue-50 text-center text-slate-400 font-black uppercase text-[10px] text-left text-left">
-                 Les directives et la période seront affichées sur CHAQUE page du dossier final.
+
+              {/* COMMENTAIRES INDIVIDUELS CENTRALISÉS */}
+              <div className="space-y-4">
+                 <div className="flex items-center gap-4 mb-6">
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left"><UserCog size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left">Commentaires par Collaborateur</h3>
+                 </div>
+
+                 {dataSummary.count === 0 ? (
+                    <div className="p-20 bg-slate-50 rounded-[3rem] border border-dashed border-slate-200 text-center text-slate-400 font-bold italic">
+                       Importez des données pour voir la liste des collaborateurs ici.
+                    </div>
+                 ) : (
+                    <div className="grid grid-cols-1 gap-4">
+                       {dataSummary.collabs.map(c => (
+                          <div key={`central-comment-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start">
+                             <div className="flex items-center gap-4 min-w-[200px] text-left">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left">{c.name[0]}</div>
+                                <span className="font-black uppercase text-slate-900 tracking-tight text-left">{c.name}</span>
+                             </div>
+                             <textarea 
+                               className="flex-1 w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:border-[#0033a0] outline-none text-sm font-bold text-slate-600 leading-relaxed italic text-left" 
+                               placeholder={`Saisissez vos conseils spécifiques pour ${c.name}...`} 
+                               value={managerComments[c.name] || ''}
+                               onChange={(e) => setManagerComments({...managerComments, [c.name]: e.target.value})}
+                             />
+                          </div>
+                       ))}
+                    </div>
+                 )}
               </div>
             </div>
           )}
@@ -488,40 +517,40 @@ export default function App() {
 
       {/* MODAL APERÇU PDF */}
       {showPdf && (
-        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden">
-          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left">
+        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left">
+          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left">
             <div className="flex items-center gap-3 text-left">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg"><Printer size={20}/></div>
-              <span className="font-black uppercase tracking-widest italic text-xs text-left">Dossier de Performance v51.1</span>
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left"><Printer size={20}/></div>
+              <span className="font-black uppercase tracking-widest italic text-xs text-left">Dossier Manager v52</span>
             </div>
             <div className="flex items-center gap-4 text-left">
-               <button onClick={handlePrint} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all">Impression Onglet</button>
-               <div className="flex flex-col gap-1 text-left text-left">
+               <button onClick={handlePrint} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left">Impression Onglet</button>
+               <div className="flex flex-col gap-1 text-left text-left text-left text-left">
                   <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Préparer PDF</button>
-                  {downloadUrl && <a href={downloadUrl} target="_blank" rel="noreferrer" className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
+                  {downloadUrl && <a href={downloadUrl} target="_blank" rel="noreferrer" className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
                </div>
-               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left"><X size={24}/></button>
+               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
             </div>
           </div>
 
           <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center">
-            <div className="bg-white shadow-2xl w-[210mm] p-0 text-left text-left" id="print-area">
+            <div className="bg-white shadow-2xl w-[210mm] p-0 text-left text-left text-left" id="print-area">
                 
                 {/* PAGE 1 : BILAN AGENCE */}
-                <div className="print-page text-left text-left">
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-blue-50 text-left">
+                <div className="print-page text-left text-left text-left">
+                    <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-blue-50 text-left text-left text-left">
                        <div className="flex items-center gap-5">
                           <ShieldCheck size={48} className="text-[#0033a0]"/>
-                          <div className="text-left text-left">
-                            <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none">Bilan Stratégique Agence</h1>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-none text-left">Rapport d'analyse du {today}</p>
+                          <div className="text-left text-left text-left">
+                            <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none text-left">Bilan Stratégique Agence</h1>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-none text-left">Executive Management Report • {today}</p>
                             <p className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mt-0.5 italic text-left">{dataSummary.range}</p>
                           </div>
                        </div>
                     </div>
-                    <div className="mb-8 text-left text-left text-left">
+                    <div className="mb-8 text-left text-left text-left text-left text-left">
                       <div className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mb-4 flex items-center gap-2 text-left"><Users size={14}/> Moyennes de l'Équipe</div>
-                      <div className="grid grid-cols-6 gap-2">
+                      <div className="grid grid-cols-6 gap-2 text-left text-left text-left text-left text-left">
                           <StatBox label="Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} />
                           <StatBox label="Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} />
                           <StatBox label="Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} />
@@ -530,23 +559,23 @@ export default function App() {
                           <StatBox label="Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} />
                       </div>
                     </div>
-                    <div className="space-y-6 flex-1 text-left text-left">
-                      <div className="p-8 bg-blue-50/50 border border-blue-100 rounded-[2rem] text-left">
+                    <div className="space-y-6 flex-1 text-left text-left text-left text-left">
+                      <div className="p-8 bg-blue-50/50 border border-blue-100 rounded-[2rem] text-left text-left text-left">
                         <div className="text-[9px] font-black text-[#0033a0] uppercase mb-4 text-left">Diagnostic Stratégique Collectif</div>
-                        <div className="space-y-4">
+                        <div className="space-y-4 text-left text-left text-left text-left text-left">
                           {agencyAudit.map((item, i) => (
                             <div key={`pdf-ag-${i}`} className="flex items-start gap-3">
                               <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${item.met ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                              <div className="text-left text-left">
-                                <span className="text-[9px] font-black uppercase opacity-40 block leading-none text-left">{item.label}</span>
-                                <p className="text-xs font-black text-slate-800 leading-tight text-left">{item.summary}</p>
-                                <p className="text-[9px] font-bold text-slate-500 mt-0.5 italic text-left">{item.numericalDetail}</p>
+                              <div className="text-left text-left text-left">
+                                <span className="text-[9px] font-black uppercase opacity-40 block leading-none text-left text-left">{item.label}</span>
+                                <p className="text-xs font-black text-slate-800 leading-tight text-left text-left">{item.summary}</p>
+                                <p className="text-[9px] font-bold text-slate-500 mt-0.5 italic text-left text-left">{item.numericalDetail}</p>
                               </div>
                             </div>
                           ))}
                         </div>
                       </div>
-                      <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[2rem] text-left text-left">
+                      <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[2rem] text-left text-left text-left">
                         <div className="text-[9px] font-black text-emerald-600 uppercase mb-4 text-left">Directives Stratégiques Agence</div>
                         <p className="text-sm font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left">
                           {agencyComment || "Poursuivez les efforts sur la prospection et maintenez la rigueur sur le terrain."}
@@ -560,7 +589,7 @@ export default function App() {
                   const detailedAudit = analysisResults[c.name] || [];
                   return (
                     <div key={`pdf-collab-${c.name}`} className="print-page text-left text-left text-left text-left text-left">
-                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 text-left">
+                      <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 text-left text-left text-left">
                          <div className="flex items-center gap-4 text-left">
                             <div className="w-10 h-10 rounded-xl bg-[#0033a0] text-white flex items-center justify-center font-black text-lg text-left">{c.name[0]}</div>
                             <div className="text-left">
@@ -573,7 +602,7 @@ export default function App() {
                             <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 text-left italic">{dataSummary.range}</p>
                          </div>
                       </div>
-                      <div className="grid grid-cols-6 gap-2 mb-8 text-left text-left">
+                      <div className="grid grid-cols-6 gap-2 mb-8 text-left text-left text-left">
                           <StatBox label="Porte/Pres" value={c.averages.rPortePres} threshold={3} isMax={true} isAverage={true} />
                           <StatBox label="Pres/Prosp" value={c.averages.rPresProsp} threshold={2} isMax={true} isAverage={true} />
                           <StatBox label="Prosp/Cl" value={c.averages.rProspClose} threshold={2} isMax={true} isAverage={true} />
@@ -581,25 +610,25 @@ export default function App() {
                           <StatBox label="BC/J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} />
                           <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} isAverage={false} suffix="%" />
                       </div>
-                      <div className="space-y-6 flex-1 text-left text-left text-left text-left">
+                      <div className="space-y-6 flex-1 text-left text-left text-left text-left text-left text-left">
                         <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50 text-left text-left text-left text-left text-left">
-                          <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left text-left text-left text-left">Diagnostic Individuel Expert</div>
-                          <div className="space-y-4 text-left">
+                          <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left text-left text-left">Diagnostic Individuel Expert</div>
+                          <div className="space-y-4 text-left text-left text-left">
                              {detailedAudit.map((item, i) => (
-                               <div key={`pdf-diag-item-${c.name}-${i}`} className="flex items-start gap-4 text-left text-left">
+                               <div key={`pdf-diag-item-${c.name}-${i}`} className="flex items-start gap-4 text-left text-left text-left">
                                  <div className={`mt-1.5 w-1.5 h-1.5 rounded-full shrink-0 ${item.met ? 'bg-emerald-500' : 'bg-rose-500'}`}></div>
-                                 <div className="flex flex-col text-left text-left text-left">
-                                   <span className="text-[8px] font-black uppercase opacity-40 leading-none text-left text-left">{item.label}</span>
-                                   <p className="text-[10px] font-black text-slate-800 leading-tight mt-0.5 text-left">{item.summary}</p>
-                                   <p className="text-[8px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left">{item.numericalDetail}</p>
+                                 <div className="flex flex-col text-left text-left text-left text-left">
+                                   <span className="text-[8px] font-black uppercase opacity-40 leading-none text-left text-left text-left">{item.label}</span>
+                                   <p className="text-[10px] font-black text-slate-800 leading-tight mt-0.5 text-left text-left">{item.summary}</p>
+                                   <p className="text-[8px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left">{item.numericalDetail}</p>
                                  </div>
                                </div>
                              ))}
                           </div>
                         </div>
-                        <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left text-left">
+                        <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left text-left text-left">
                           <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left">Commentaires Manager</div>
-                          <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left">
+                          <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left">
                             {managerComments[c.name] || "Maintenez la rigueur sur l'ensemble de vos indicateurs pour garantir la stabilité de vos résultats."}
                           </p>
                         </div>
