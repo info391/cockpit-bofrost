@@ -76,7 +76,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
             <div className="w-10 h-10 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-black italic text-lg shadow-lg">{name.charAt(0)}</div>
             <div className="text-left">
               <h4 className="text-xl font-black text-slate-900 tracking-tighter uppercase leading-none mb-1 print:text-base">{name}</h4>
-              <div className="flex gap-2">
+              <div className="flex gap-2 text-left">
                 {badges?.up && <TrendBadge type="up" small />}
                 {badges?.down && <TrendBadge type="down" small />}
                 {badges?.stable && <TrendBadge type="stable" small />}
@@ -93,7 +93,7 @@ const CollaboratorAuditSection = ({ name, data, analysisItems, badges, actionPla
         <RuleMiniChart title="Moyenne BC / Jour" data={data} dataKey="valBC" threshold={12} isMax={false} />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-        <div className="bg-indigo-50/20 rounded-xl p-4 border border-indigo-100/30 relative text-left print:p-2 print:border-none print:bg-white text-left">
+        <div className="bg-indigo-50/20 rounded-xl p-4 border border-indigo-100/30 relative text-left print:p-2 print:border-none print:bg-white text-left text-left">
           <h5 className="text-[8px] font-black text-indigo-400 uppercase tracking-widest mb-2 italic print:text-[7px] text-left uppercase">Diagnostic IA</h5>
           <div className="space-y-2.5 text-left">
             {analysisItems?.map((line, lIdx) => (
@@ -137,13 +137,12 @@ export default function App() {
   const [actionPlans, setActionPlans] = useState({});
   const [errorMsg, setErrorMsg] = useState(null);
   const [diagInfo, setDiagInfo] = useState(null);
-  const [cooldown, setCooldown] = useState(0); // Compteur pour éviter le spam
+  const [cooldown, setCooldown] = useState(0); 
   
   const [userApiKey, setUserApiKey] = useState(localStorage.getItem('em_gemini_key') || '');
 
   const todayDate = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
 
-  // Effet pour gérer le cooldown du bouton
   useEffect(() => {
     if (cooldown > 0) {
       const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
@@ -151,7 +150,6 @@ export default function App() {
     }
   }, [cooldown]);
 
-  // Chargement html2pdf
   useEffect(() => {
     const script = document.createElement('script');
     script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
@@ -253,15 +251,14 @@ export default function App() {
     setLoading(true);
     setErrorMsg(null);
     
-    // Simplification extrême pour limiter les jetons
     const instructions = `Expert Coach Bofrost. Analyser :
     1. [SECTION_START]Bilan d'Agence[SECTION_END] avec 3 [POS] et 3 [AMEL].
     2. Pour chaque collaborateur : [COLLAB_START]Nom Complet[COLLAB_END] puis 2 phrases courtes.
     Cible: 12 BC/jour. Données : \n${pastedData}`;
 
-    // On priorise gemini-1.5-flash qui a souvent des quotas plus souples
+    // MISE À JOUR : On utilise uniquement les modèles validés par le diagnostic
     const attempts = [
-      { ver: 'v1beta', model: 'gemini-1.5-flash' },
+      { ver: 'v1beta', model: 'gemini-2.5-flash' },
       { ver: 'v1beta', model: 'gemini-2.0-flash' }
     ];
 
@@ -279,8 +276,8 @@ export default function App() {
         });
 
         if (response.status === 429) {
-          setCooldown(60); // On force une attente de 60s
-          throw new Error(`QUOTA ÉPUISÉ : Google bloque l'accès temporairement. Veuillez patienter pendant le décompte du bouton.`);
+          setCooldown(60); 
+          throw new Error(`QUOTA ÉPUISÉ : Google bloque l'accès temporairement. Veuillez patienter 60s.`);
         }
 
         const res = await response.json();
@@ -339,7 +336,7 @@ export default function App() {
            <div className="flex items-center gap-4 mb-6 mt-2"><h3 className="text-lg font-black text-indigo-950 uppercase border-l-[4px] border-indigo-600 pl-4">{item.content}</h3><div className="h-px bg-slate-200 flex-1"></div></div>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
               <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-emerald-700 font-black text-xs uppercase tracking-widest text-left"><ThumbsUp size={16}/> Points Positifs</div><ul className="space-y-3">{item.summary.pos.slice(0,3).map((p, i) => <li key={`pos-${i}`} className="text-[14px] font-extrabold text-emerald-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-emerald-400">•</span> {p}</li>)}</ul></div>
-              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={`amel-${i}`} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
+              <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 print:p-3 print:bg-white text-left"><div className="flex items-center gap-2 mb-4 text-amber-700 font-black text-xs uppercase tracking-widest text-left text-left"><AlertCircle size={16}/> Axes d'Amélioration</div><ul className="space-y-3">{item.summary.amel.slice(0,3).map((p, i) => <li key={`amel-${i}`} className="text-[14px] font-extrabold text-amber-900 leading-tight flex gap-3 print:text-[12px]"><span className="text-amber-400">•</span> {p}</li>)}</ul></div>
               <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 print:p-3 print:bg-white text-left text-left text-left"><div className="flex items-center gap-2 mb-4 text-indigo-700 font-black text-xs uppercase tracking-widest"><Medal size={16}/> Podium BC</div><div className="space-y-2">{teamRanking.slice(0, 5).map((player, i) => <div key={`rank-${i}`} className="flex justify-between text-[11px] font-black uppercase text-left"><span className="text-slate-500 text-left">{i+1}. {player.name}</span><span className={player.bc >= 12 ? 'text-emerald-600' : 'text-rose-600'}>{player.bc}/j</span></div>)}</div></div>
            </div>
         </div>
@@ -382,7 +379,7 @@ export default function App() {
       <aside className="w-64 bg-indigo-950 text-white flex flex-col shadow-2xl z-20 print:hidden text-left">
         <div className="p-5 border-b border-white/10 bg-indigo-900/40 text-left">
           <div className="flex items-center gap-3 mb-2 text-left"><div className="p-1.5 bg-indigo-500 rounded-lg shadow-lg text-left"><ShieldCheck size={18} className="text-white" /></div><span className="font-black text-base tracking-tighter uppercase leading-none text-left">EM EXECUTIVE</span></div>
-          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v23.0</p>
+          <p className="text-indigo-300 text-[7px] font-black uppercase tracking-[0.2em] opacity-60 italic text-left">Stable Release v23.1</p>
           <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-[8px] font-black uppercase tracking-widest text-left"><Globe size={10}/> Production</div>
         </div>
         <div className="flex-1 p-3 space-y-6 overflow-y-auto text-left">
@@ -425,7 +422,7 @@ export default function App() {
             <div className="max-w-5xl mx-auto space-y-10 pb-24 text-left">
                {collaborators.map(name => (
                   <div key={`plan-${name}`} className="bg-white rounded-[3rem] p-10 shadow-xl border border-slate-200 text-left">
-                     <div className="flex items-center gap-6 mb-8 text-left"><div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-black italic shadow-inner text-left">{name.charAt(0)}</div><span className="text-3xl font-black text-slate-950 tracking-tighter uppercase text-left">{name}</span></div>
+                     <div className="flex items-center gap-6 mb-8 text-left text-left text-left text-left"><div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-2xl font-black italic shadow-inner text-left">{name.charAt(0)}</div><span className="text-3xl font-black text-slate-950 tracking-tighter uppercase text-left">{name}</span></div>
                      <textarea className="w-full p-8 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-600 outline-none text-lg font-bold text-slate-700 leading-relaxed italic shadow-inner text-left" placeholder={`Directives de coaching pour ${name}...`} value={actionPlans[name.toLowerCase().replace(/\s/g, '')] || ''} onChange={(e) => setActionPlans({...actionPlans, [name.toLowerCase().replace(/\s/g, '')]: e.target.value})}/>
                   </div>
                ))}
