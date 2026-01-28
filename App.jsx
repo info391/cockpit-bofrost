@@ -131,7 +131,7 @@ const CoachingTextarea = ({ value, onChange, placeholder, label, maxLength = 500
   </div>
 );
 
-// --- MOTEUR D'AUDIT LOCAL DEVELOPPÉ ---
+// --- MOTEUR D'AUDIT ---
 const runDetailedAudit = (averages) => {
   if (!averages) return [];
 
@@ -170,14 +170,14 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
           <div className="flex items-center gap-5">
             <ShieldCheck size={48} className="text-[#0033a0]"/>
             <div className="text-left">
-              <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none text-left">Bilan Stratégique Agence</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-none text-left">Rapport du {today}</p>
-              <p className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mt-0.5 italic text-left">{dataSummary.range}</p>
+              <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none">Bilan Stratégique Agence</h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Rapport du {today}</p>
+              <p className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mt-0.5 italic">{dataSummary.range}</p>
             </div>
           </div>
         </div>
         <div className="mb-8">
-          <div className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mb-4 flex items-center gap-2"><Users size={14}/> Moyennes de l'Équipe</div>
+          <div className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mb-4 flex items-center gap-2"><Users size={14}/> Moyennes Équipe</div>
           <div className="grid grid-cols-6 gap-2">
             <StatBox label="Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
             <StatBox label="Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
@@ -189,7 +189,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
         </div>
         <div className="space-y-6 flex-1 text-left">
           <div className="p-8 bg-blue-50/50 border border-blue-100 rounded-[2rem]">
-            <div className="text-[9px] font-black text-[#0033a0] uppercase mb-4">Diagnostic Stratégique Collectif</div>
+            <div className="text-[9px] font-black text-[#0033a0] uppercase mb-4 text-left">Diagnostic Stratégique Collectif</div>
             <div className="space-y-4">
               {agencyAudit.map((item, i) => {
                 const IconComponent = item.icon;
@@ -198,7 +198,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
                     <div className={`mt-1 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                       {IconComponent && <IconComponent size={24} />}
                     </div>
-                    <div className="text-left text-left">
+                    <div className="text-left">
                       <span className="text-[9px] font-black uppercase opacity-40 block leading-none">{item.label}</span>
                       <p className="text-xs font-black text-slate-800 leading-tight">{item.summary}</p>
                       <p className="text-[9px] font-bold text-slate-500 mt-0.5 italic">{item.numericalDetail}</p>
@@ -219,10 +219,10 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
       {dataSummary.collabs.map((c) => {
         const audit = analysisResults[c.name] || [];
         return (
-          <div key={`p-collab-${c.name}`} className="print-page text-left text-left text-left">
-            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100 text-left">
-              <div className="flex items-center gap-4 text-left">
-                <div className="w-10 h-10 rounded-xl bg-[#0033a0] text-white flex items-center justify-center font-black text-lg text-left">{c.name[0]}</div>
+          <div key={`p-collab-${c.name}`} className="print-page text-left">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
+              <div className="flex items-center gap-4">
+                <div className="w-10 h-10 rounded-xl bg-[#0033a0] text-white flex items-center justify-center font-black text-lg">{c.name[0]}</div>
                 <div className="text-left">
                   <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900 leading-none">{c.name}</h3>
                   <p className="text-[8px] font-bold text-[#0033a0] uppercase tracking-widest mt-1">Dossier Individuel de Performance</p>
@@ -230,10 +230,10 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
               </div>
               <div className="text-right">
                 <p className="text-[9px] font-black text-slate-400 uppercase leading-none">Analyse du {today}</p>
-                <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 italic text-right">{dataSummary.range}</p>
+                <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 italic">{dataSummary.range}</p>
               </div>
             </div>
-            <div className="grid grid-cols-6 gap-2 mb-8 text-left text-left">
+            <div className="grid grid-cols-6 gap-2 mb-8 text-left">
               <StatBox label="Porte/Pres" value={c.averages.rPortePres} threshold={3} isMax={true} isAverage={true} icon={DoorOpen} />
               <StatBox label="Pres/Prosp" value={c.averages.rPresProsp} threshold={2} isMax={true} isAverage={true} icon={UserSearch} />
               <StatBox label="Prosp/Cl" value={c.averages.rProspClose} threshold={2} isMax={true} isAverage={true} icon={FileCheck} />
@@ -241,21 +241,21 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
               <StatBox label="BC/J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
               <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} isAverage={false} suffix="%" icon={CalendarCheck} />
             </div>
-            <div className="space-y-6 flex-1 text-left text-left">
+            <div className="space-y-6 flex-1 text-left">
               <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50">
                 <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left">Diagnostic Individuel Expert</div>
                 <div className="space-y-4">
                   {audit.map((item, i) => {
-                    const IconComponent = item.icon;
+                    const IconComp = item.icon;
                     return (
-                      <div key={`p-diag-${c.name}-${i}`} className="flex items-start gap-5 text-left text-left">
+                      <div key={`p-diag-${c.name}-${i}`} className="flex items-start gap-5">
                         <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
-                          {IconComponent && <IconComponent size={24} />}
+                          {IconComp && <IconComp size={24} />}
                         </div>
                         <div className="flex flex-col text-left">
                           <span className="text-[8px] font-black uppercase opacity-40 leading-none">{item.label}</span>
-                          <p className="text-[10px] font-black text-slate-800 leading-tight mt-0.5 text-left">{item.summary}</p>
-                          <p className="text-[8px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left">{item.numericalDetail}</p>
+                          <p className="text-[10px] font-black text-slate-800 leading-tight mt-0.5">{item.summary}</p>
+                          <p className="text-[8px] font-bold text-slate-500 mt-1 italic leading-relaxed">{item.numericalDetail}</p>
                         </div>
                       </div>
                     );
@@ -263,8 +263,8 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
                 </div>
               </div>
               <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left">
-                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left text-left">Commentaires Manager</div>
-                <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left text-left">{managerComments[c.name] || "Maintenez la rigueur."}</p>
+                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest">Commentaires Manager</div>
+                <p className="text-xs font-bold text-emerald-950 italic whitespace-pre-wrap">{managerComments[c.name] || "Maintenez la rigueur."}</p>
               </div>
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function App() {
     const lines = pastedData.split('\n').filter(l => l.trim().length > 0);
     const headers = lines[0].split(/[|\t]/).map(h => h.trim().toLowerCase());
     
-    // DÉTECTION COLONNE "Nom du collaborateur"
+    // DÉTECTION PRÉCISE COLONNE "Nom du collaborateur"
     const nameIdx = headers.findIndex(h => h.includes("nom du collaborateur") || h === "nom");
     const weekIdx = headers.findIndex(h => h.includes("semaine"));
     const monthIdx = headers.findIndex(h => h.includes("mois"));
@@ -317,6 +317,8 @@ export default function App() {
     const clIdx = headers.findIndex(h => h.includes("closings"));
     const bcIdx = headers.findIndex(h => h.includes("bc"));
     const attIdx = headers.findIndex(h => h.includes("présence"));
+
+    if (nameIdx === -1) return { count: 0, collabs: [], agencyAvg: {}, range: "Colonne 'Nom' non trouvée" };
 
     const entries = lines.slice(1).map(line => {
       const p = line.split(/[|\t]/).map(v => v.trim());
@@ -341,11 +343,13 @@ export default function App() {
       const k = e.name.toLowerCase().replace(/\s/g, '');
       if (!map[k]) map[k] = { name: e.name, entries: [] };
       if (e.isPresent) { agS.po += e.po; agS.pr += e.pr; agS.ps += e.ps; agS.cl += e.cl; agS.bc += e.bc; agS.attD += 1; }
-      agS.totD += 1; map[k].entries.push(e);
+      agS.totD += 1;
+      map[k].entries.push(e);
     });
 
     const collabs = Object.values(map).map(c => {
-      const worked = c.entries.filter(w => w.isPresent); const wL = worked.length || 1;
+      const worked = c.entries.filter(w => w.isPresent);
+      const wL = worked.length || 1;
       const sums = worked.reduce((a, b) => ({ 
         po: a.po + (b.pr > 0 ? b.po/b.pr : 0), 
         pr: a.pr + (b.ps > 0 ? b.pr/b.ps : 0), 
@@ -353,6 +357,9 @@ export default function App() {
         cl: a.cl + (b.bc > 0 ? b.cl/b.bc : 0), 
         bc: a.bc + b.bc 
       }), { po: 0, pr: 0, ps: 0, cl: 0, bc: 0 });
+      
+      const totalEntries = c.entries.length || 1;
+      
       return { 
         name: c.name, 
         averages: { 
@@ -361,7 +368,7 @@ export default function App() {
           rProspClose: (sums.ps / wL).toFixed(2), 
           rClosingBC: (sums.cl / wL).toFixed(2), 
           valBC: (sums.bc / wL).toFixed(1), 
-          attendance: Math.round((worked.length / c.entries.length) * 100) 
+          attendance: Math.round((worked.length / totalEntries) * 100) 
         } 
       };
     });
@@ -396,7 +403,7 @@ export default function App() {
     setLoading(false);
   };
 
-  const handlePrint = () => {
+  const handlePrintAction = () => {
     const target = document.getElementById('print-target');
     if (!target) return;
     const win = window.open('', '_blank');
@@ -414,7 +421,7 @@ export default function App() {
     setIsExporting(true);
     const el = document.getElementById('print-target');
     window.html2pdf().from(el).set({
-      margin: 0, filename: `Audit_Performance.pdf`,
+      margin: 0, filename: `Audit_Executive.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
@@ -424,18 +431,18 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans text-left text-sm">
-      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left">
+      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white rounded-xl shadow-lg text-left"><ShieldCheck className="text-[#0033a0]" size={20} /></div>
-          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none text-left">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left">v60.0 Stable</span></div>
+          <div className="p-2 bg-white rounded-xl shadow-lg"><ShieldCheck className="text-[#0033a0]" size={20} /></div>
+          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase">v60.0 Stable</span></div>
         </div>
-        <nav className="flex flex-col gap-1.5 text-left text-left">
+        <nav className="flex flex-col gap-1.5 text-left">
           <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Source de données" />
           <SidebarLink active={tab==='analyse'} onClick={() => setTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Stratégique" disabled={dataSummary.count === 0}/>
           <SidebarLink active={tab==='config'} onClick={() => setTab('config')} icon={<ListTodo size={16}/>} label="Directives Coaching" />
         </nav>
         <div className="mt-auto pt-6 border-t border-white/10 text-left">
-          <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2 text-left"><Scale size={12}/> Seuils Cibles</h3>
+          <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2"><Scale size={12}/> Seuils Cibles</h3>
           <div className="space-y-1.5 text-left">
             <RuleItem label="Porte / Pres" target="≤ 3" icon={DoorOpen} /><RuleItem label="Pres / Prosp" target="≤ 2" icon={UserSearch} /><RuleItem label="Prosp / Close" target="≤ 2" icon={FileCheck} /><RuleItem label="Close / BC" target="≤ 2" icon={Handshake} /><RuleItem label="Volume BC / J" target="≥ 12" icon={Zap} /><RuleItem label="Présence" target="100%" icon={CalendarCheck} />
           </div>
@@ -443,16 +450,16 @@ export default function App() {
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left">
-        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left text-left">
-          <div className="flex items-center gap-4 text-left">
+        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left">
+          <div className="flex items-center gap-4 text-left text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0]">Dashboard du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest">Stable v60</span>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">v60.0 Stable</span>
           </div>
-          <div className="flex gap-2">
-            {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all text-left"><Trash2 size={18}/></button>}
-            <button onClick={handlePrint} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[10px] shadow hover:bg-slate-200 transition-all text-left text-left"><Printer size={14}/> Imprimer</button>
-            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left text-left text-left"><Eye size={14}/> Aperçu & PDF</button>
+          <div className="flex gap-2 text-left">
+            {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all"><Trash2 size={18}/></button>}
+            <button onClick={handlePrintAction} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[10px] shadow hover:bg-slate-200 transition-all"><Printer size={14}/> Imprimer</button>
+            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left"><Eye size={14}/> Aperçu & PDF</button>
           </div>
         </header>
 
@@ -461,12 +468,12 @@ export default function App() {
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left text-left">
               <div className={cardClass}>
                 <div className="flex items-center gap-3 mb-6 text-left"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left">Import des données</h3></div>
-                <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left">
+                <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left text-left">
                     <MultiSelectDropdown label="Filtrer par Mois" options={availableFilters.months} selected={selectedMonths} onToggle={(v)=>setSelectedMonths(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Filter}/>
                     <MultiSelectDropdown label="Filtrer par Semaine" options={availableFilters.weeks} selected={selectedWeeks} onToggle={(v)=>setSelectedWeeks(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Calendar}/>
                 </div>
-                <div className="mt-8 flex justify-end text-left"><button onClick={handleAnalyse} disabled={loading || dataSummary.count === 0} className="px-12 py-5 bg-[#0033a0] text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all uppercase text-left">Générer l'Audit</button></div>
+                <div className="mt-8 flex justify-end text-left"><button onClick={handleAnalyse} disabled={loading || dataSummary.count === 0} className="px-12 py-5 bg-[#0033a0] text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all uppercase">Générer l'Audit</button></div>
               </div>
             </div>
           )}
@@ -475,11 +482,11 @@ export default function App() {
             <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left">
               {/* BILAN AGENCE ÉCRAN */}
               <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left">
-                <div className="flex items-center gap-4 mb-8 text-left">
+                <div className="flex items-center gap-4 mb-8 text-left text-left">
                   <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left"><Building2 size={28}/></div>
-                  <div className="text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left">Performance consolidée ({dataSummary.range})</p></div>
+                  <div className="text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left">Performance consolidée ({dataSummary.range})</p></div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left">
                   <StatBox label="Moy. Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
                   <StatBox label="Moy. Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
                   <StatBox label="Moy. Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={FileCheck} />
@@ -488,7 +495,7 @@ export default function App() {
                   <StatBox label="Moy. Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left text-left">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left text-left text-left text-left text-left">
                     <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left"><Activity size={14}/> Diagnostic Automatique</div>
                     <div className="space-y-4">
                       {agencyAudit.map((item, i) => {
@@ -498,19 +505,19 @@ export default function App() {
                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-400 text-emerald-900' : 'bg-rose-400 text-rose-900'}`}>
                                 {IconComponent && <IconComponent size={28} />}
                              </div>
-                             <div className="text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
+                             <div className="text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left">
-                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] text-left text-left">
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left text-left text-left">
+                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
+                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] text-left text-left text-left text-left text-left">
                         {agencyComment ? (
-                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left text-left">{agencyComment}</p>
+                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left">{agencyComment}</p>
                         ) : (
-                           <p className="text-blue-200/50 text-xs italic text-left text-left text-left text-left text-left">Rédigez vos directives globales dans l'onglet coaching.</p>
+                           <p className="text-blue-200/50 text-xs italic text-left text-left text-left text-left">Saisissez vos directives dans l'onglet coaching.</p>
                         )}
                      </div>
                   </div>
@@ -520,11 +527,11 @@ export default function App() {
               {/* COLLABORATEURS ÉCRAN */}
               {dataSummary.collabs.map((c) => (
                 <div key={`card-${c.name}`} className={cardClass}>
-                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left">
-                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left">{c.name[0]}</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left">{c.name}</h3>
+                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left">{c.name[0]}</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left">{c.name}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} icon={DoorOpen} />
                     <StatBox label="Pres / Prosp" value={c.averages.rPresProsp} threshold={2} icon={UserSearch} />
                     <StatBox label="Prosp / Cl" value={c.averages.rProspClose} threshold={2} icon={FileCheck} />
@@ -533,9 +540,9 @@ export default function App() {
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" icon={CalendarCheck} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left text-left">
-                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
-                      <div className="space-y-4">
+                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
+                      <div className="space-y-4 text-left text-left text-left text-left">
                         {(analysisResults[c.name] || []).map((item, i) => {
                           const IconComp = item.icon;
                           return (
@@ -543,14 +550,14 @@ export default function App() {
                               <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                                  {IconComp && <IconComp size={28} />}
                               </div>
-                              <div className="text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left">{item.numericalDetail}</p></div>
+                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left text-left">{item.numericalDetail}</p></div>
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left">
-                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
+                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left">
+                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
                       <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder="Conseils personnalisés (500 chars max)..." maxLength={500}/>
                     </div>
                   </div>
@@ -560,24 +567,24 @@ export default function App() {
           )}
 
           {tab === 'config' && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left">
+            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left">
               <div className={cardClass}>
                  <div className="flex items-center gap-4 mb-8 text-left text-left">
-                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
+                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left"><Building2 size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left">Directives Agence Globales</h3>
                  </div>
-                 <CoachingTextarea label="Message global (Page 1 du rapport)" value={agencyComment} onChange={setAgencyComment} placeholder="Saisissez ici les objectifs globaux (500 chars max)..." maxLength={500}/>
+                 <CoachingTextarea label="Message global (Page 1 du rapport)" value={agencyComment} onChange={setAgencyComment} placeholder="Objectifs globaux (500 chars max)..." maxLength={500}/>
               </div>
-              <div className="space-y-4 text-left text-left text-left">
-                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Commentaires par Collaborateur</h3>
+              <div className="space-y-4 text-left text-left text-left text-left">
+                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left">
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left"><UserCog size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left">Commentaires par Collaborateur</h3>
                  </div>
                  {dataSummary.collabs.map(c => (
-                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left text-left">
-                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left text-left">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left">{c.name[0]}</div>
-                          <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{c.name}</span>
+                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left">
+                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left">{c.name[0]}</div>
+                          <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left">{c.name}</span>
                        </div>
                        <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder={`Conseils pour ${c.name}...`} maxLength={500}/>
                     </div>
@@ -590,23 +597,23 @@ export default function App() {
 
       {/* MODAL APERÇU PDF (GARANTIT innerHTML != null) */}
       {showPdf && (
-        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left">
-          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
-              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu du Dossier Executive</span>
+        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left">
+          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left text-left text-left">
+            <div className="flex items-center gap-3 text-left text-left">
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left"><Printer size={20}/></div>
+              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left">Aperçu du Dossier Executive</span>
             </div>
-            <div className="flex items-center gap-4 text-left text-left text-left">
-               <button onClick={handlePrint} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left text-left text-left">Impression Système</button>
-               <div className="flex flex-col gap-1 text-left text-left text-left text-left text-left text-left text-left text-left">
-                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left text-left text-left text-left text-left text-left text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
-                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
+            <div className="flex items-center gap-4 text-left text-left text-left text-left">
+               <button onClick={handlePrintAction} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left">Impression Système</button>
+               <div className="flex flex-col gap-1 text-left text-left text-left text-left">
+                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
+                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left text-left text-left text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
                </div>
-               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
+               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left">
+            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left text-left">
                <ReportLayout today={today} dataSummary={dataSummary} agencyAudit={agencyAudit} analysisResults={analysisResults} agencyComment={agencyComment} managerComments={managerComments} />
             </div>
           </div>
