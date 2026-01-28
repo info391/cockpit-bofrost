@@ -153,8 +153,8 @@ const runDetailedAudit = (averages) => {
   return [
     check(averages.rPortePres, 3, "Portes / Présents", "L'accroche est excellente.", "Taux de présence insuffisant.", "Votre maîtrise du ratio Portes/Présents démontre une excellente lecture de vos secteurs. Vous savez manifestement identifier les moments et les lieux où les prospects sont présents et disposés à vous écouter. Cette efficacité dans l'approche vous permet de maximiser votre temps de présentation sans gaspiller d'énergie sur des portes closes ou des refus catégoriques. C'est un atout majeur qui fluidifie tout le reste de votre entonnoir de vente actuel.", "Un ratio Portes/Présents trop élevé indique souvent que vous ne trouvez pas assez de personnes ou que vous n'arrivez pas à transformer l'ouverture de porte en temps d'écoute. Pour corriger cela, optimisez vos tournées en ciblant les horaires stratégiques (fin de journée ou mercredi). Travaillez aussi votre accroche de 'pas de porte' : l'objectif est de rassurer immédiatement pour que le client accepte votre présence. Soyez plus observateur sur les signes.", DoorOpen, true),
     check(averages.rPresProsp, 2, "Présents / Prospects", "Découverte client maîtrisée.", "Phase de découverte courte.", "Votre capacité à transformer un présent en prospect montre que vous savez identifier avec précision les besoins réels du foyer durant votre présentation. En posant les bonnes questions ouvertes, vous amenez le client à verbaliser ses attentes, ce qui facilite grandement la suite du processus. Vous ne faites pas qu'exposer des produits, vous apportez des solutions concrètes, ce qui crée une valeur perçue élevée. Continuez à soigner cette étape de qualification.", "Vous présentez nos services mais vous ne parvenez pas assez à convaincre de leur utilité. Il est crucial de passer plus de temps sur la phase de découverte pour isoler les habitudes de consommation du foyer. Actuellement, votre discours semble trop générique et ne crée pas assez d'impact émotionnel ou pratique chez le client. Travaillez sur l'écoute active : laissez le client s'exprimer davantage pour pouvoir rebondir sur ses points de douleur spécifiques terrain.", UserSearch, true),
-    check(averages.rProspClose, 2, "Prospects / Closing", "Transformation fluide.", "Engagement client fragile.", "Votre sélection qualitative des prospects en amont garantit une transition naturelle vers la vente. Vous savez trier les profils dès le départ, ce qui vous évite de perdre du temps sur des négociations stériles. Votre force réside dans la validation progressive des étapes de vente : quand vous arrivez au closing, le client est déjà convaincu psychologiquement. Cette fluidité réduit votre fatigue mentale et renforce votre image de professionnel du conseil expert.", "L'engagement client s'affaiblit systématiquement en fin de parcours, ce qui indique un manque de verrouillage lors des étapes précédentes. Vous arrivez souvent au closing face à des objections qui auraient dû être levées bien plus tôt. Il est nécessaire de travailler la reformulation et la validation par 'petits oui' tout au long de votre présentation. Si le client hésite au moment final, c'est que la valeur ajoutée perçue n'est pas encore assez forte ici.", FileCheck, true),
-    check(averages.rClosingBC, 2, "Closing / BC", "Clôture administrative parfaite.", "Vérifiez votre processus BC.", "Votre taux de transformation entre le closing moral et la saisie du bon de commande est exemplaire. Cela prouve que vous sécurisez parfaitement l'engagement du client et que vous maîtrisez l'aspect administratif sans créer de friction. Le client se sent accompagné jusqu'au bout, ce qui limite les rétractations précoces et les doutes post-achat. Cette rigueur dans la conclusion est le signe d'une grande confiance en soi et en la qualité de l'offre.", "Trop de ventes validées oralement s'évaporent avant la signature définitive du bon de commande. Ce décalage suggère une baisse de tension ou un manque de professionnalisme au moment de sortir le document officiel. Le client ressent peut-être votre propre hésitation, ce qui réactive ses peurs. Assurez-vous d'avoir levé tous les derniers doutes et restez ferme dans votre posture de conseil jusqu'à la validation technique. La vente n'est pas encore terminée.", Handshake, true),
+    check(averages.rProspClose, 2, "Prospects / Closing", "Transformation fluide.", "Engagement client fragile.", "Votre sélection qualitative des prospects en amont garantit une transition naturelle vers la vente. Vous savez trier les profils dès le départ, ce qui vous évite de perdre du temps sur des négociations stériles. Votre force réside dans la validation progressive des étapes de vente : quand vous arrivez au closing, le client est déjà convaincu psychologiquement. Cette fluidité réduit votre fatigue mentale et renforce votre image de professionnel du conseil expert.", "L'engagement client s'affaiblit systématiquement en fin de parcours, ce qui indique un manque de verrouillage lors des étapes précédentes. Vous arrivez souvent au closing face à des objections qui auraient dû être levées bien plus tôt. Il est nécessaire de travailler la reformulation et la validation par 'petits oui' tout au long de votre présentation. Si le client hésite au moment final, c'est que la valeur ajoutée perçue n'est pas encore assez forte ici.", Handshake, true),
+    check(averages.rClosingBC, 2, "Closing / BC", "Clôture administrative parfaite.", "Vérifiez votre processus BC.", "Votre taux de transformation entre le closing moral et la saisie du bon de commande est exemplaire. Cela prouve que vous sécurisez parfaitement l'engagement du client et que vous maîtrisez l'aspect administratif sans créer de friction. Le client se sent accompagné jusqu'au bout, ce qui limite les rétractations précoces et les doutes post-achat. Cette rigueur dans la conclusion est le signe d'une grande confiance en soi et en la qualité de l'offre.", "Trop de ventes validées oralement s'évaporent avant la signature définitive du bon de commande. Ce décalage suggère une baisse de tension ou un manque de professionnalisme au moment de sortir le document officiel. Le client ressent peut-être votre propre hésitation, ce qui réactive ses peurs. Assurez-vous d'avoir levé tous les derniers doutes et restez ferme dans votre posture de conseil jusqu'à la validation technique. La vente n'est pas encore terminée.", FileCheck, true),
     check(averages.valBC, 12, "BC / Jour", "Volume de production solide.", "Productivité à renforcer.", "Votre productivité quotidienne est en parfaite adéquation avec les standards de rentabilité de l'agence. Ce volume régulier assure non seulement vos revenus, mais il témoigne aussi d'une gestion exemplaire de votre secteur et de votre énergie sur le terrain. En maintenant cette cadence, vous vous donnez les moyens d'amortir les jours plus difficiles et de surperformer lors des périodes de forte activité. Votre assiduité au travail est votre moteur de succès.", "Votre volume moyen de commandes ne permet pas d'exploiter tout le potentiel de votre secteur géographique. Pour stabiliser vos résultats, vous devez impérativement augmenter votre nombre de passages ou optimiser radicalement vos ratios de transformation. Une productivité en retrait est souvent le signe d'une baisse d'intensité sur le terrain ou d'une mauvaise organisation de votre tournée. Fixez-vous des objectifs horaires stricts pour gagner en volume.", Zap, false),
     check(averages.attendance, 100, "Présence", "Assiduité totale.", "Irrégularité pénalisante.", "Votre engagement total sur le terrain est le fondement de votre réussite. Votre présence constante assure une couverture secteur optimale et renforce la crédibilité de l'agence auprès de vos clients qui apprécient la régularité du service. Cette fiabilité est indispensable pour construire un portefeuille client solide et fidèle sur le long terme. C'est votre sérieux qui fait la différence avec la concurrence et qui sécurise votre carrière au sein du groupe.", "Vos absences répétées ou irrégulières brisent la dynamique commerciale indispensable à la tenue de votre secteur. Chaque jour manqué est une opportunité perdue et un signal négatif envoyé à votre clientèle qui attend de la régularité. En vente directe, le manque de présence est le premier facteur de chute des résultats, car il empêche la création d'un cercle vertueux de prospection et de recommandation. La discipline de présence est le levier le plus puissant.", CalendarCheck, false, "%")
   ];
@@ -170,9 +170,9 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
           <div className="flex items-center gap-5">
             <ShieldCheck size={48} className="text-[#0033a0]"/>
             <div className="text-left">
-              <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none">Bilan Stratégique Agence</h1>
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Rapport du {today}</p>
-              <p className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mt-0.5 italic">{dataSummary.range}</p>
+              <h1 className="text-3xl font-black uppercase text-[#0033a0] tracking-tighter italic leading-none text-left">Bilan Stratégique Agence</h1>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1 leading-none text-left">Rapport du {today}</p>
+              <p className="text-[9px] font-black text-[#0033a0] uppercase tracking-widest mt-0.5 italic text-left">{dataSummary.range}</p>
             </div>
           </div>
         </div>
@@ -181,8 +181,8 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
           <div className="grid grid-cols-6 gap-2">
             <StatBox label="Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
             <StatBox label="Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
-            <StatBox label="Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={FileCheck} />
-            <StatBox label="Close/BC" value={dataSummary.agencyAvg.rClosingBC} threshold={2} isAverage={true} icon={Handshake} />
+            <StatBox label="Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={Handshake} />
+            <StatBox label="Close/BC" value={dataSummary.agencyAvg.rClosingBC} threshold={2} isAverage={true} icon={FileCheck} />
             <StatBox label="BC/J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
             <StatBox label="Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
           </div>
@@ -229,31 +229,31 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-[9px] font-black text-slate-400 uppercase leading-none">Analyse du {today}</p>
+                <p className="text-[9px] font-black text-slate-400 uppercase leading-none text-left">Analyse du {today}</p>
                 <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 italic text-right">{dataSummary.range}</p>
               </div>
             </div>
             <div className="grid grid-cols-6 gap-2 mb-8 text-left">
               <StatBox label="Porte/Pres" value={c.averages.rPortePres} threshold={3} isMax={true} isAverage={true} icon={DoorOpen} />
               <StatBox label="Pres/Prosp" value={c.averages.rPresProsp} threshold={2} isMax={true} isAverage={true} icon={UserSearch} />
-              <StatBox label="Prosp/Cl" value={c.averages.rProspClose} threshold={2} isMax={true} isAverage={true} icon={FileCheck} />
-              <StatBox label="Close/BC" value={c.averages.rClosingBC} threshold={2} isMax={true} isAverage={true} icon={Handshake} />
+              <StatBox label="Prosp/Cl" value={c.averages.rProspClose} threshold={2} isMax={true} isAverage={true} icon={Handshake} />
+              <StatBox label="Close/BC" value={c.averages.rClosingBC} threshold={2} isMax={true} isAverage={true} icon={FileCheck} />
               <StatBox label="BC/J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
               <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} isAverage={false} suffix="%" icon={CalendarCheck} />
             </div>
             <div className="space-y-6 flex-1 text-left">
-              <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50">
+              <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50 text-left">
                 <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left">Diagnostic Individuel Expert</div>
                 <div className="space-y-4 text-left">
                   {audit.map((item, i) => {
                     const IconComponent = item.icon;
                     return (
-                      <div key={`p-diag-${c.name}-${i}`} className="flex items-start gap-5 text-left">
+                      <div key={`p-diag-${c.name}-${i}`} className="flex items-start gap-5 text-left text-left">
                         <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                           {IconComponent && <IconComponent size={24} />}
                         </div>
                         <div className="flex flex-col text-left">
-                          <span className="text-[8px] font-black uppercase opacity-40 leading-none text-left">{item.label}</span>
+                          <span className="text-[8px] font-black uppercase opacity-40 leading-none">{item.label}</span>
                           <p className="text-[10px] font-black text-slate-800 leading-tight mt-0.5 text-left">{item.summary}</p>
                           <p className="text-[8px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left">{item.numericalDetail}</p>
                         </div>
@@ -262,9 +262,9 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
                   })}
                 </div>
               </div>
-              <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left">
-                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left">Commentaires Manager</div>
-                <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left">{managerComments[c.name] || "Maintenez la rigueur."}</p>
+              <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left text-left">
+                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left text-left">Commentaires Manager</div>
+                <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left text-left">{managerComments[c.name] || "Maintenez la rigueur."}</p>
               </div>
             </div>
           </div>
@@ -302,12 +302,11 @@ export default function App() {
     }
   }, []);
 
-  const dataSummary = useMemo(() => {
-    if (!pastedData || pastedData.trim().length < 10) return { count: 0, collabs: [], agencyAvg: {}, range: "..." };
+  const rawDataEntries = useMemo(() => {
+    if (!pastedData || pastedData.trim().length < 10) return [];
     const lines = pastedData.split('\n').filter(l => l.trim().length > 0);
     const headers = lines[0].split(/[|\t]/).map(h => h.trim().toLowerCase());
     
-    // DÉTECTION PRÉCISE COLONNE "Nom du collaborateur"
     const nameIdx = headers.findIndex(h => h.includes("nom du collaborateur") || h === "nom");
     const weekIdx = headers.findIndex(h => h.includes("semaine"));
     const monthIdx = headers.findIndex(h => h.includes("mois"));
@@ -318,9 +317,9 @@ export default function App() {
     const bcIdx = headers.findIndex(h => h.includes("bc"));
     const attIdx = headers.findIndex(h => h.includes("présence"));
 
-    if (nameIdx === -1) return { count: 0, collabs: [], agencyAvg: {}, range: "Erreur de colonne" };
+    if (nameIdx === -1) return [];
 
-    const entries = lines.slice(1).map(line => {
+    return lines.slice(1).map(line => {
       const p = line.split(/[|\t]/).map(v => v.trim());
       if (!p[nameIdx] || p[nameIdx].toLowerCase().includes("nom")) return null;
       return {
@@ -331,12 +330,22 @@ export default function App() {
         isPresent: (attIdx !== -1 && p[attIdx]) ? (p[attIdx].toUpperCase().startsWith('P')) : true
       };
     }).filter(e => e !== null);
+  }, [pastedData]);
 
-    const filtered = entries.filter(e => {
+  const availableFilters = useMemo(() => {
+    const m = [...new Set(rawDataEntries.map(e => e.month))].filter(v => v && v !== "Inconnu").sort();
+    const w = [...new Set(rawDataEntries.map(e => e.week))].sort((a, b) => parseInt(a) - parseInt(b));
+    return { months: m, weeks: w.map(v => `S${v}`) };
+  }, [rawDataEntries]);
+
+  const dataSummary = useMemo(() => {
+    if (rawDataEntries.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "..." };
+    const filtered = rawDataEntries.filter(e => {
       const mMatch = selectedMonths.length === 0 || selectedMonths.includes(e.month);
       const wMatch = selectedWeeks.length === 0 || selectedWeeks.includes(`S${e.week}`);
       return mMatch && wMatch;
     });
+    if (filtered.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "Sélection vide" };
 
     const map = {}; let agS = { po: 0, pr: 0, ps: 0, cl: 0, bc: 0, attD: 0, totD: 0 };
     filtered.forEach(e => {
@@ -372,22 +381,7 @@ export default function App() {
 
     const agencyAvg = { rPortePres: agS.pr > 0 ? (agS.po / agS.pr).toFixed(2) : 0, rPresProsp: agS.ps > 0 ? (agS.pr / agS.ps).toFixed(2) : 0, rProspClose: agS.cl > 0 ? (agS.ps / agS.cl).toFixed(2) : 0, rClosingBC: agS.bc > 0 ? (agS.cl / agS.bc).toFixed(2) : 0, valBC: agS.attD > 0 ? (agS.bc / agS.attD).toFixed(1) : 0, attendance: agS.totD > 0 ? Math.round((agS.attD / agS.totD) * 100) : 0 };
     return { count: collabs.length, collabs, agencyAvg, range: `${selectedMonths.length > 0 ? selectedMonths.join(', ') : 'Période complète'} | ${selectedWeeks.length > 0 ? selectedWeeks.join(', ') : 'Toutes semaines'}` };
-  }, [pastedData, selectedMonths, selectedWeeks]);
-
-  const availableFilters = useMemo(() => {
-    if (!pastedData) return { months: [], weeks: [] };
-    const lines = pastedData.split('\n').filter(l => l.trim().length > 0);
-    const headers = lines[0].split(/[|\t]/).map(h => h.trim().toLowerCase());
-    const mIdx = headers.findIndex(h => h.includes("mois"));
-    const wIdx = headers.findIndex(h => h.includes("semaine"));
-    const mSet = new Set(); const wSet = new Set();
-    lines.slice(1).forEach(line => {
-      const p = line.split(/[|\t]/).map(v => v.trim());
-      if (mIdx !== -1 && p[mIdx]) mSet.add(p[mIdx]);
-      if (wIdx !== -1 && p[wIdx]) wSet.add(`S${p[wIdx]}`);
-    });
-    return { months: [...mSet].sort(), weeks: [...wSet].sort() };
-  }, [pastedData]);
+  }, [rawDataEntries, selectedMonths, selectedWeeks]);
 
   const handleAnalyse = () => {
     setLoading(true);
@@ -429,34 +423,34 @@ export default function App() {
   return (
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans text-left text-sm">
       <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl">
-        <div className="flex items-center gap-3 text-left">
+        <div className="flex items-center gap-3">
           <div className="p-2 bg-white rounded-xl shadow-lg"><ShieldCheck className="text-[#0033a0]" size={20} /></div>
-          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none text-left text-left">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left">v60.0 Stable</span></div>
+          <div><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase">v60.0 Stable</span></div>
         </div>
         <nav className="flex flex-col gap-1.5 text-left">
-          <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Données Source" />
+          <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Source de données" />
           <SidebarLink active={tab==='analyse'} onClick={() => setTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Stratégique" disabled={dataSummary.count === 0}/>
           <SidebarLink active={tab==='config'} onClick={() => setTab('config')} icon={<ListTodo size={16}/>} label="Directives Coaching" />
         </nav>
         <div className="mt-auto pt-6 border-t border-white/10 text-left">
           <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2"><Scale size={12}/> Seuils Cibles</h3>
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 text-left">
             <RuleItem label="Porte / Pres" target="≤ 3" icon={DoorOpen} /><RuleItem label="Pres / Prosp" target="≤ 2" icon={UserSearch} /><RuleItem label="Prosp / Close" target="≤ 2" icon={Handshake} /><RuleItem label="Close / BC" target="≤ 2" icon={FileCheck} /><RuleItem label="Volume BC / J" target="≥ 12" icon={Zap} /><RuleItem label="Présence" target="100%" icon={CalendarCheck} />
           </div>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left">
-        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left">
+        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10">
           <div className="flex items-center gap-4 text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0]">Dashboard du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none text-left">v60.0 Stable</span>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">v60.0 Stable</span>
           </div>
           <div className="flex gap-2">
             {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all"><Trash2 size={18}/></button>}
             <button onClick={handlePrintAction} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[10px] shadow hover:bg-slate-200 transition-all text-left"><Printer size={14}/> Imprimer</button>
-            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left text-left text-left"><Eye size={14}/> Aperçu & PDF</button>
+            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left text-left"><Eye size={14}/> Aperçu & PDF</button>
           </div>
         </header>
 
@@ -464,24 +458,38 @@ export default function App() {
           {tab === 'import' && (
             <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left">
               <div className={cardClass}>
-                <div className="flex items-center gap-3 mb-6 text-left"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left">Import des données</h3></div>
+                <div className="flex items-center gap-3 mb-6"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900">Import des données</h3></div>
                 <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left text-left">
+                
+                {/* BLOC D'INFORMATION DES COLLABORATEURS DÉTECTÉS */}
+                {dataSummary.count > 0 && (
+                  <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl mb-8 animate-in zoom-in duration-300">
+                    <div className="bg-white p-2 rounded-lg shadow-sm">
+                      <Users className="text-[#0033a0]" size={20} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-[#0033a0] uppercase tracking-widest leading-none">Analyse nominative</p>
+                      <p className="text-sm font-bold text-slate-700 mt-1">Le système a identifié <span className="text-[#0033a0] font-black">{dataSummary.count}</span> collaborateur(s) prêt(s) pour l'audit stratégique.</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left">
                     <MultiSelectDropdown label="Filtrer par Mois" options={availableFilters.months} selected={selectedMonths} onToggle={(v)=>setSelectedMonths(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Filter}/>
                     <MultiSelectDropdown label="Filtrer par Semaine" options={availableFilters.weeks} selected={selectedWeeks} onToggle={(v)=>setSelectedWeeks(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Calendar}/>
                 </div>
-                <div className="mt-8 flex justify-end text-left"><button onClick={handleAnalyse} disabled={loading || dataSummary.count === 0} className="px-12 py-5 bg-[#0033a0] text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all uppercase text-left">Lancer l'Audit</button></div>
+                <div className="mt-8 flex justify-end"><button onClick={handleAnalyse} disabled={loading || dataSummary.count === 0} className="px-12 py-5 bg-[#0033a0] text-white rounded-2xl font-black text-sm shadow-xl hover:scale-105 transition-all uppercase">Générer l'Audit</button></div>
               </div>
             </div>
           )}
 
           {tab === 'analyse' && (
-            <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left">
+            <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left">
               {/* BILAN AGENCE ÉCRAN */}
               <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left">
-                <div className="flex items-center gap-4 mb-8 text-left text-left text-left">
-                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left text-left text-left"><Building2 size={28}/></div>
-                  <div className="text-left text-left text-left text-left text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left text-left">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left">Performance consolidée ({dataSummary.range})</p></div>
+                <div className="flex items-center gap-4 mb-8 text-left">
+                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20"><Building2 size={28}/></div>
+                  <div><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2">Performance consolidée ({dataSummary.range})</p></div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left">
                   <StatBox label="Moy. Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
@@ -492,29 +500,29 @@ export default function App() {
                   <StatBox label="Moy. Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left">
-                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Automatique</div>
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
+                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left"><Activity size={14}/> Diagnostic Automatique</div>
                     <div className="space-y-4">
                       {agencyAudit.map((item, i) => {
-                        const IconComponent = item.icon;
+                        const IconComp = item.icon;
                         return (
                           <div key={`agency-item-${i}`} className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${item.met ? 'bg-white/10 border-white/20' : 'bg-rose-500/20 border-rose-500/30'}`}>
                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-400 text-emerald-900' : 'bg-rose-400 text-rose-900'}`}>
-                                {IconComponent && <IconComponent size={28} />}
+                                {IconComp && <IconComp size={28} />}
                              </div>
-                             <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left text-left text-left text-left text-left">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left text-left text-left text-left text-left text-left text-left text-left">{item.numericalDetail}</p></div>
+                             <div className="text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left text-left text-left">
-                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] text-left">
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left">
+                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left"><ThumbsUp size={14}/> Directives Agence</div>
+                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px]">
                         {agencyComment ? (
-                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left">{agencyComment}</p>
+                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left">{agencyComment}</p>
                         ) : (
-                           <p className="text-blue-200/50 text-xs italic text-left text-left text-left text-left">Saisissez vos directives dans l'onglet coaching.</p>
+                           <p className="text-blue-200/50 text-xs italic text-left">Saisissez vos directives dans l'onglet coaching.</p>
                         )}
                      </div>
                   </div>
@@ -524,11 +532,11 @@ export default function App() {
               {/* COLLABORATEURS ÉCRAN */}
               {dataSummary.collabs.map((c) => (
                 <div key={`card-${c.name}`} className={cardClass}>
-                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left">
-                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left">{c.name[0]}</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left">{c.name}</h3>
+                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left">{c.name[0]}</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left">{c.name}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} icon={DoorOpen} />
                     <StatBox label="Pres / Prosp" value={c.averages.rPresProsp} threshold={2} icon={UserSearch} />
                     <StatBox label="Prosp / Cl" value={c.averages.rProspClose} threshold={2} icon={Handshake} />
@@ -537,9 +545,9 @@ export default function App() {
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" icon={CalendarCheck} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left text-left text-left text-left">
-                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
-                      <div className="space-y-4">
+                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left">
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
+                      <div className="space-y-4 text-left text-left">
                         {(analysisResults[c.name] || []).map((item, i) => {
                           const IconComp = item.icon;
                           return (
@@ -547,14 +555,14 @@ export default function App() {
                               <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                                  {IconComp && <IconComp size={28} />}
                               </div>
-                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left text-left text-left text-left text-left text-left">{item.numericalDetail}</p></div>
+                              <div className="text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left">{item.numericalDetail}</p></div>
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left">
-                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
+                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left">
+                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
                       <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder="Conseils personnalisés (500 chars max)..." maxLength={500}/>
                     </div>
                   </div>
@@ -564,24 +572,24 @@ export default function App() {
           )}
 
           {tab === 'config' && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left text-left">
+            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left">
               <div className={cardClass}>
-                 <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left">
-                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
+                 <div className="flex items-center gap-4 mb-8 text-left text-left">
+                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left"><Building2 size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left">Directives Agence Globales</h3>
                  </div>
-                 <CoachingTextarea label="Message global (Page 1 du rapport)" value={agencyComment} onChange={setAgencyComment} placeholder="Saisissez ici les objectifs globaux (500 chars max)..." maxLength={500}/>
+                 <CoachingTextarea label="Message global (Page 1 du rapport)" value={agencyComment} onChange={setAgencyComment} placeholder="Objectifs globaux (500 chars max)..." maxLength={500}/>
               </div>
-              <div className="space-y-4 text-left text-left text-left text-left text-left text-left">
-                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left text-left text-left text-left text-left text-left">Commentaires par Collaborateur</h3>
+              <div className="space-y-4 text-left text-left">
+                 <div className="flex items-center gap-4 mb-6 text-left text-left">
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left"><UserCog size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left">Commentaires par Collaborateur</h3>
                  </div>
                  {dataSummary.collabs.map(c => (
-                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left text-left text-left">
-                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left text-left text-left">{c.name[0]}</div>
-                          <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{c.name}</span>
+                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left">
+                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left">{c.name[0]}</div>
+                          <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left">{c.name}</span>
                        </div>
                        <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder={`Conseils pour ${c.name}...`} maxLength={500}/>
                     </div>
@@ -594,23 +602,23 @@ export default function App() {
 
       {/* MODAL APERÇU PDF (GARANTIT innerHTML != null) */}
       {showPdf && (
-        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left text-left text-left">
-          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="flex items-center gap-3 text-left text-left text-left text-left">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
-              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu du Dossier Executive</span>
+        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left">
+          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left text-left text-left">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left"><Printer size={20}/></div>
+              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left">Aperçu du Dossier Executive</span>
             </div>
-            <div className="flex items-center gap-4 text-left text-left text-left text-left text-left">
-               <button onClick={handlePrintAction} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left text-left text-left text-left">Impression Système</button>
-               <div className="flex flex-col gap-1 text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
-                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
+            <div className="flex items-center gap-4 text-left text-left text-left text-left">
+               <button onClick={handlePrintAction} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left">Impression Système</button>
+               <div className="flex flex-col gap-1 text-left text-left text-left">
+                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left text-left text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
+                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left text-left text-left text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
                </div>
-               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
+               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left">
+            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left">
                <ReportLayout today={today} dataSummary={dataSummary} agencyAudit={agencyAudit} analysisResults={analysisResults} agencyComment={agencyComment} managerComments={managerComments} />
             </div>
           </div>
