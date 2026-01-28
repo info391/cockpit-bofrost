@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { 
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 import { 
   ClipboardPaste, Loader2, User, ListTodo, ShieldCheck, 
   LayoutDashboard, X, Eye, FileDown, ThumbsUp, Activity, Database, 
   Scale, Calendar, Printer, Users, Check, ChevronDown, Trash2, 
-  Building2, UserCog, DoorOpen, UserSearch, Handshake, FileCheck, Zap, CalendarCheck, ExternalLink, Filter
+  Building2, UserCog, DoorOpen, UserSearch, Handshake, FileCheck, Zap, CalendarCheck, ExternalLink, Filter, PenTool
 } from 'lucide-react';
 
 // --- CONSTANTES DE STYLE ---
@@ -21,8 +21,7 @@ const SidebarLink = ({ active, onClick, icon, label, disabled }) => (
     disabled={disabled}
     className={`w-full flex items-center gap-3 px-5 py-3.5 rounded-xl text-xs font-black transition-all ${
       disabled ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10 hover:text-white'
-    } ${active ? 'bg-white text-[#0033a0] shadow-xl' : 'text-[#0033a0]'}`}
-    style={{ backgroundColor: active ? 'white' : 'transparent', color: active ? '#0033a0' : '#cbd5e1' }}
+    } ${active ? 'bg-white text-[#0033a0] shadow-xl' : 'text-blue-100'}`}
   >
     <span className="shrink-0">{icon}</span>
     <span className="truncate text-left">{label}</span>
@@ -30,12 +29,12 @@ const SidebarLink = ({ active, onClick, icon, label, disabled }) => (
 );
 
 const RuleItem = ({ label, target, icon: Icon }) => (
-  <div className="flex items-center justify-between text-[9px] bg-white/10 p-2.5 rounded-lg border border-white/5 backdrop-blur-sm">
-    <div className="flex items-center gap-2 text-left">
+  <div className="flex items-center justify-between text-[9px] bg-white/10 p-2.5 rounded-lg border border-white/5 backdrop-blur-sm text-left">
+    <div className="flex items-center gap-2">
       {Icon && <Icon size={12} className="text-blue-300" />}
       <span className="font-bold text-blue-50 uppercase tracking-tighter">{label}</span>
     </div>
-    <span className="font-black text-blue-200">{target}</span>
+    <span className={`font-black ${target.includes('≥') || target.includes('100') ? 'text-emerald-300' : 'text-blue-200'}`}>{target}</span>
   </div>
 );
 
@@ -133,42 +132,49 @@ const CoachingTextarea = ({ value, onChange, placeholder, label, maxLength = 500
 );
 
 // --- MOTEUR D'AUDIT ---
-const runDetailedAudit = (averages, isAgency = false, topPerformers = []) => {
+const runDetailedAudit = (averages, isAgency = false, performers = []) => {
   if (!averages) return [];
 
   const check = (val, threshold, label, successMsg, failMsg, passArg, failArg, icon, isMax = true, suffix = "") => {
     const num = parseFloat(val);
     const met = isMax ? num <= threshold : num >= threshold;
+    const valueDisplay = `${num}${suffix}`;
+    const targetDisplay = isMax ? `≤ ${threshold}${suffix}` : `≥ ${threshold}${suffix}`;
+    
     return {
-      label, met, icon, summary: met ? successMsg : failMsg,
-      numericalDetail: `Diagnostic : ${met ? passArg : failArg} (Observé : ${num}${suffix} / Cible : ${isMax ? '≤' : '≥'} ${threshold}${suffix}).`
+      label,
+      met,
+      icon,
+      summary: met ? successMsg : failMsg,
+      numericalDetail: `Diagnostic : ${met ? passArg : failArg} (Observé : ${valueDisplay} pour un objectif à ${targetDisplay}).`
     };
   };
 
-  if (isAgency) {
-    const performersList = topPerformers.length > 0 
-      ? topPerformers.map(p => `${p.name} (${p.count}x)`).join(', ') 
-      : "Aucun collaborateur n'a encore atteint ce palier d'excellence.";
+  const performersList = performers.length > 0 
+    ? performers.map(p => `${p.name} (${p.count}x)`).join(', ') 
+    : "Aucun collaborateur n'a encore atteint ce palier stratégique.";
 
+  if (isAgency) {
     return [
       check(averages.rPortePres, 3, "Portes / Présents", "Maîtrise du ciblage horaire.", "Déficit de présence à l'écoute.", 
-        "L'analyse globale de la performance de l'agence sur le ratio Portes/Présents met en lumière une compréhension stratégique exceptionnelle de la gestion des secteurs géographiques. Vos équipes démontrent une capacité remarquable à synchroniser leurs passages avec les pics de présence des prospects au domicile, ce qui constitue le premier levier de rentabilité de notre activité de vente directe. Cette efficacité chirurgicale dans l'approche initiale permet non seulement de réduire l'épuisement physique des collaborateurs sur le terrain, mais elle garantit également une fluidité maximale tout au long du cycle de vente. En identifiant avec une telle précision les créneaux horaires les plus porteurs, l'agence optimise ses ressources et maximise les opportunités de présentation qualitative. Il est impératif de maintenir ce niveau d'exigence dans le ciblage pour pérenniser ce succès collectif sur le long terme de l'agence.",
-        "Le ratio Portes/Présents actuel de l'agence révèle un déficit critique dans l'organisation tactique des tournées sur le terrain. Un nombre trop important d'ouvertures de portes ne débouche pas sur un temps d'écoute, ce qui suggère une inadéquation flagrante entre les horaires de passage et les habitudes de vie des prospects ciblés par la structure. Pour redresser la situation, il est impératif d'opérer une refonte de la stratégie de passage en privilégiant les créneaux de fin de journée ou les mercredi après-midi, moments où la disponibilité mentale des clients est maximale. L'agence doit également renforcer la formation de ses équipes sur l'accroche de 'pas de porte' pour instaurer un climat de confiance immédiat dès les premières secondes de l'interaction. Sans une correction rapide de ce premier indicateur, l'ensemble de l'entonnoir de vente globale restera sous-performant.", DoorOpen, true),
-      check(averages.rPresProsp, 2, "Présents / Prospects", "Expertise en découverte client.", "Phase de découverte fragile.", 
-        "L'agence affiche une maîtrise technique impressionnante lors de la phase cruciale de découverte client, transformant les simples présences en prospects qualifiés avec une régularité exemplaire. Cette étape, qui est souvent le point de rupture dans le cycle de vente, est ici gérée avec une finesse psychologique qui honore le professionnalisme de vos équipes. En posant les bonnes questions ouvertes et en pratiquant une écoute active rigoureuse, vos collaborateurs parviennent à extraire les besoins latents des foyers pour les transformer en opportunités concrètes. Cette capacité à créer de la valeur perçue dès les premières minutes de l'entretien est le socle sur lequel repose votre croissance actuelle. Il est fondamental de continuer à valoriser cette approche qualitative du métier, car elle réduit mécaniquement le taux de refus lors du closing final. Le niveau d'expertise est ici validé.",
-        "Le diagnostic sur la transformation des présents en prospects indique une fragilité dans la phase de découverte collective de l'agence. Actuellement, le discours semble trop orienté vers la présentation produit plutôt que vers l'exploration des besoins réels du client final. Pour optimiser ce ratio, il est nécessaire de réinjecter de l'empathie et de la curiosité dans l'échange. Un prospect qui ne se projette pas ne signera jamais de bon de commande. Le management doit impérativement organiser des ateliers de jeux de rôles focalisés sur la reformulation et l'identification des points de douleur des foyers. Si vos équipes ne parviennent pas à convaincre de l'utilité du service à ce stade, tout le processus de closing sera irrémédiablement compromis. Il s'agit ici d'un levier de conversion majeur à activer d'urgence pour stabiliser les résultats mensuels et garantir la progression du chiffre d'affaires global.", UserSearch, true),
+        "L'analyse globale de la performance de l'agence sur le ratio Portes/Présents met en lumière une compréhension stratégique exceptionnelle de la gestion des secteurs géographiques. Vos équipes démontrent une capacité remarquable à synchroniser leurs passages avec les pics de présence des prospects au domicile, ce qui constitue le premier levier de rentabilité de notre activité de vente directe. Cette efficacité chirurgicale dans l'approche initiale permet non seulement de réduire l'épuisement physique des collaborateurs sur le terrain, mais elle garantit également une fluidité maximale tout au long du cycle de vente. En identifiant avec une telle précision les créneaux horaires les plus porteurs, l'agence optimise ses ressources et maximise les opportunités de présentation qualitative. Il est impératif de maintenir ce niveau d'exigence dans le ciblage pour pérenniser ce succès collectif sur le long terme de l'agence Executive pour l'avenir du groupe.",
+        "Le ratio Portes/Présents actuel de l'agence révèle un déficit critique dans l'organisation tactique des tournées sur le terrain. Un nombre trop important d'ouvertures de portes ne débouche pas sur un temps d'écoute, ce qui suggère une inadéquation flagrante entre les horaires de passage et les habitudes de vie des prospects ciblés par la structure. Pour redresser la situation, il est impératif d'opérer une refonte de la stratégie de passage en privilégiant les créneaux de fin de journée ou les mercredi après-midi, moments où la disponibilité mentale des clients est maximale. L'agence doit également renforcer la formation de ses équipes sur l'accroche de 'pas de porte' pour instaurer un climat de confiance immédiat dès les premières secondes de l'interaction. Sans une correction rapide de ce premier indicateur, l'ensemble de l'entonnoir de vente globale de l'agence Executive restera sous-performant pour le moment.", DoorOpen, true),
+      check(averages.rPresProsp, 2, "Présents / Prospects", "Expertise en découverte client.", "Phase de découverte courte.", 
+        "L'agence affiche une maîtrise technique impressionnante lors de la phase cruciale de découverte client, transformant les simples présences en prospects qualifiés avec une régularité exemplaire. Cette étape, qui est souvent le point de rupture dans le cycle de vente, est ici gérée avec une finesse psychologique qui honore le professionnalisme de vos équipes. En posant les bonnes questions ouvertes et en pratiquant une écoute active rigoureuse, vos collaborateurs parviennent à extraire les besoins latents des foyers pour les transformer en opportunités concrètes. Cette capacité à créer de la valeur perçue dès les premières minutes de l'entretien est le socle sur lequel repose votre croissance actuelle. Il est fondamental de continuer à valoriser cette approche qualitative du métier, car elle réduit mécaniquement le taux de refus lors du closing final. Le niveau d'expertise est ici validé pour tout le groupe de terrain Executive.",
+        "Le diagnostic sur la transformation des présents en prospects indique une fragilité dans la phase de découverte collective de l'agence. Actuellement, le discours semble trop orienté vers la présentation produit plutôt que vers l'exploration des besoins réels du client final. Pour optimiser ce ratio, il est nécessaire de réinjecter de l'empathie et de la curiosité dans l'échange. Un prospect qui ne se projette pas ne signera jamais de bon de commande. Le management doit impérativement organiser des ateliers de jeux de rôles focalisés sur la reformulation et l'identification des points de douleur des foyers. Si vos équipes ne parviennent pas à convaincre de l'utilité du service à ce stade, tout le processus de closing sera irrémédiablement compromis. Il s'agit ici d'un levier de conversion majeur à activer d'urgence pour stabiliser les résultats mensuels et garantir la progression du chiffre d'affaires global de la structure actuelle.", UserSearch, true),
       check(averages.rProspClose, 2, "Prospects / Closing", "Cycle de closing optimisé.", "Perte d'efficacité au closing.", 
-        "La fluidité observée entre la phase de qualification des prospects et la conclusion des ventes témoigne d'un haut niveau de maturité commerciale au sein de l'agence. Vos équipes ne se contentent pas de présenter des offres ; elles accompagnent les clients vers une décision naturelle en verrouillant chaque étape de l'argumentaire. Cette transition fluide est le résultat d'un travail méticuleux sur la levée des objections en amont, évitant ainsi les confrontations stériles en fin de parcours. Le client se sent écouté et compris, ce qui facilite grandement l'engagement psychologique nécessaire à la validation de la commande. Cette efficacité dans la transformation est un avantage concurrentiel majeur pour l'agence, permettant d'optimiser le temps passé sur le terrain et de maximiser le retour sur investissement de chaque tournée. Maintenez ce focus permanent sur la validation progressive.",
-        "L'agence rencontre des difficultés marquées lors de la phase de transformation des prospects en closings, ce qui suggère un manque de verrouillage lors des étapes précédentes. Trop de prospects qualifiés s'évaporent au moment de la décision finale, révélant des objections latentes qui n'ont pas été traitées à temps par les collaborateurs. Pour remédier à cette situation, il est crucial de travailler sur la technique des 'petits oui' tout au long de la présentation. Le closing ne doit pas être un événement soudain, mais l'aboutissement logique d'un accord mutuel construit étape par étape. Si le client hésite au moment crucial, c'est que la valeur ajoutée perçue n'est pas encore assez forte ou que des freins psychologiques n'ont pas été exprimés clairement. Un renforcement des compétences en conclusion de vente est indispensable pour ne plus laisser de opportunités s'échapper inutilement ici.", Handshake, true),
+        "La fluidité observée entre la phase de qualification des prospects et la conclusion des ventes témoigne d'un haut niveau de maturité commerciale au sein de l'agence. Vos équipes ne se contentent pas de présenter des offres ; elles accompagnent les clients vers une décision naturelle en verrouillant chaque étape de l'argumentaire. Cette transition fluide est le résultat d'un travail méticuleux sur la levée des objections en amont, évitant ainsi les confrontations stériles en fin de parcours. Le client se sent écouté et compris, ce qui facilite grandement l'engagement psychologique nécessaire à la validation de la commande. Cette efficacité dans la transformation est un avantage concurrentiel majeur pour l'agence, permettant d'optimiser le temps passé sur le terrain et de maximiser le retour sur investissement de chaque tournée. Maintenez ce focus permanent sur la validation progressive des étapes clés pour réussir.",
+        "L'agence rencontre des difficultés marquées lors de la phase de transformation des prospects en closings, ce qui suggère un manque de verrouillage lors des étapes précédentes. Trop de prospects qualifiés s'évaporent au moment de la décision finale, révélant des objections latentes qui n'ont pas été traitées à temps par les collaborateurs. Pour remédier à cette situation, il est crucial de travailler sur la technique des 'petits oui' tout au long de la présentation. Le closing ne doit pas être un événement soudain, mais l'aboutissement logique d'un accord mutuel construit étape par étape. Si le client hésite au moment crucial, c'est que la valeur ajoutée perçue n'est pas encore assez forte ou que des freins psychologiques n'ont pas été exprimés clairement. Un renforcement des compétences en conclusion de vente est indispensable pour ne plus laisser de opportunités s'échapper inutilement ici aujourd'hui pour l'agence.", Handshake, true),
       check(averages.rClosingBC, 2, "Closing / BC", "Rigueur administrative totale.", "Évaporation post-closing.", 
-        "La rigueur administrative et le suivi du processus de clôture des bons de commande sont des points forts indéniables de votre structure. Transformer un closing moral en un engagement contractuel ferme demande une discipline que vos équipes ont parfaitement intégrée. Cette étape finale est gérée sans aucune friction, ce qui sécurise non seulement le chiffre d'affaires immédiat mais renforce également l'image de marque de l'entreprise auprès des nouveaux clients. En évitant les doutes post-closing grâce à une posture de conseil ferme et rassurante, l'agence limite drastiquement les risques de rétractation et optimise sa chaîne logistique. Cette maîtrise du dernier kilomètre administratif est la preuve d'une organisation interne saine et d'un management qui accorde de l'importance au détail. Continuez à appliquer ces protocoles de vérification systématique pour garantir la qualité totale.",
-        "L'agence subit une perte d'efficacité alarmante entre la validation morale de la vente et la saisie effective du bon de commande. Ce décalage suggère une baisse de tension psychologique ou un manque de professionnalisme au moment de formaliser l'engagement sur papier. Le client ressent peut-être l'hésitation du collaborateur, ce qui réactive ses peurs et bloque la signature finale. Pour corriger ce tir, il est impératif que le management rappelle les fondamentaux de la prise de congé et de la sécurisation du contrat. Un closing n'est jamais terminé tant que le document n'est pas signé et les modalités de livraison clairement acceptées par les deux parties. Il est nécessaire de revoir les procédures de saisie immédiate sur le terrain pour éviter que l'enthousiasme du client ne retombe. La rigueur administrative doit devenir une priorité absolue pour sécuriser votre production.", FileCheck, true),
+        "La rigueur administrative et le suivi du processus de clôture des bons de commande sont des points forts indéniables de votre structure. Transformer un closing moral en un engagement contractuel ferme demande une discipline que vos équipes ont parfaitement intégrée. Cette étape finale est gérée sans aucune friction, ce qui sécurise non seulement le chiffre d'affaires immédiat mais renforce également l'image de marque de l'entreprise auprès des nouveaux clients. En évitant les doutes post-closing grâce à une posture de conseil ferme et rassurante, l'agence limite drastiquement les risques de rétractation et optimise sa chaîne logistique. Cette maîtrise du dernier kilomètre administratif est la preuve d'une organisation interne saine et d'un management qui accorde de l'importance au détail. Continuez à appliquer ces protocoles de vérification systématique pour garantir la qualité totale de production globale ici.",
+        "L'agence subit une perte d'efficacité alarmante entre la validation morale de la vente et la saisie effective du bon de commande. Ce décalage suggère une baisse de tension psychologique ou un manque de professionnalisme au moment de formaliser l'engagement sur papier. Le client ressent peut-être l'hésitation du collaborateur, ce qui réactive ses peurs et bloque la signature finale. Pour corriger ce tir, il est impératif que le management rappelle les fondamentaux de la prise de congé et de la sécurisation du contrat. Un closing n'est jamais terminé tant que le document n'est pas signé et les modalités de livraison clairement acceptées par les deux parties. Il est nécessaire de revoir les procédures de saisie immédiate sur le terrain pour éviter que l'enthousiasme du client ne retombe. La rigueur administrative doit devenir une priorité absolue pour sécuriser votre production de l'agence Executive.", FileCheck, true),
       check(averages.valBC, 12, "BC / Jour", "Volume de production exemplaire.", "Productivité sous les seuils.", 
-        `L'analyse de la productivité volumétrique de l'agence révèle une dynamique collective qu'il convient de décortiquer pour assurer la pérennité de notre modèle économique. Atteindre le seuil de 12 BC/jour n'est pas une mince affaire ; c'est le reflet d'une intensité de terrain et d'une organisation tactique maîtrisée. Sur cette période, nous tenons à féliciter les collaborateurs qui ont franchi ce palier stratégique : ${performersList}. Ces résultats prouvent que l'excellence est à portée de main quand la méthode est appliquée. Cette dynamique insuffle une énergie positive à toute l'équipe et crée une saine émulation. Maintenir ce rythme permet de garantir les revenus de la structure tout en affirmant notre position de leader sur le secteur. Le management doit utiliser ces performances comme étalons pour accompagner la montée en puissance de l'ensemble de l'agence Executive.`,
-        `La productivité moyenne de l'agence est actuellement insuffisante pour exploiter tout le potentiel des secteurs géographiques. Un volume inférieur à 12 BC/jour fragilise l'équilibre économique de la structure. Nous notons toutefois que certains éléments parviennent à tirer leur épingle du jeu : ${performersList}. Malgré ces réussites isolées, l'effort doit devenir collectif. Pour relancer la machine, il est nécessaire de fixer des objectifs horaires plus stricts et de redynamiser les départs terrain. Une productivité en retrait est souvent le signal d'un essoufflement moral ou d'une routine qui s'installe insidieusement. Le management doit réinsuffler de l'ambition et de la vitesse dans l'exécution des tâches quotidiennes. Augmenter le nombre de passages est le levier le plus simple pour faire remonter mécaniquement le volume de commandes et sécuriser la croissance.`, Zap, false),
+        `L'analyse de la productivité volumétrique de l'agence révèle une dynamique collective qu'il convient de décortiquer pour assurer la pérennité de notre modèle économique. Atteindre le seuil de 12 BC/jour n'est pas une mince affaire ; c'est le reflet d'une intensité de terrain et d'une organisation tactique maîtrisée. Sur cette période, nous tenons à féliciter les collaborateurs qui ont franchi ce palier stratégique : ${performersList}. Ces résultats prouvent que l'excellence est à portée de main quand la méthode est appliquée. Cette dynamique insuffle une énergie positive à toute l'équipe et crée une saine émulation entre les collaborateurs de terrain. Maintenir ce rythme permet de garantir les revenus de la structure tout en affirmant notre position de leader sur le secteur. Le management doit utiliser ces performances comme étalons pour la montée en puissance de l'ensemble du groupe Executive localement.`,
+        `La productivité moyenne de l'agence est actuellement insuffisante pour exploiter tout le potentiel des secteurs géographiques. Un volume inférieur à 12 BC/jour fragilise l'équilibre économique de la structure. Nous notons toutefois que certains éléments parviennent à tirer leur épingle du jeu : ${performersList}. Malgré ces réussites isolées, l'effort doit devenir collectif. Pour relancer la machine, il est nécessaire de fixer des objectifs horaires plus stricts et de redynamiser les départs terrain. Une productivité en retrait est souvent le signal d'un essoufflement moral ou d'une routine qui s'installe insidieusement. Le management doit réinsuffler de l'ambition et de la vitesse dans l'exécution des tâches quotidiennes. Augmenter le nombre de passages est le levier le plus simple pour faire remonter mécaniquement le volume de commandes et sécuriser la croissance de l'agence Executive.`, PenTool, false),
       check(averages.attendance, 100, "Présence", "Engagement collectif total.", "Déficit d'assiduité équipe.", 
-        "L'assiduité totale et l'engagement sans faille de vos collaborateurs sur le terrain constituent le socle inébranlable de la réussite de l'agence. Une présence à 100% garantit une couverture optimale de vos secteurs et assure une réactivité maximale face aux opportunités du marché. Cette discipline collective est d'autant plus remarquable qu'elle témoigne d'une adhésion forte aux valeurs de l'entreprise et d'une motivation sans faille pour atteindre les objectifs communs. En vente directe, la présence est le seul facteur de succès que nous maîtrisons totalement, et l'agence en fait une démonstration exemplaire chaque jour. Cette fiabilité exemplaire permet d'instaurer une relation de confiance durable avec la clientèle locale qui apprécie la régularité et le sérieux du service proposé. Continuez à cultiver cet esprit de corps et cette rigueur professionnelle qui font la force.",
-        "L'agence souffre d'une irrégularité de présence qui fragilise l'ensemble de sa dynamique commerciale. Les absences répétées, qu'elles soient justifiées ou non, brisent la continuité du service et empêchent l'exploitation méthodique des secteurs. En vente directe, chaque jour manqué est une opportunité de vente perdue qui ne se rattrapera jamais. Ce manque d'assiduité envoie également un signal négatif au reste de l'équipe et peut dégrader le moral collectif si aucune mesure n'est prise. Le management doit impérativement rappeler que la discipline de présence est le premier pilier de la réussite professionnelle dans notre métier. Il est nécessaire de mettre en place un suivi plus rigoureux du planning et de valoriser l'assiduité comme un critère de performance majeur. Sans une présence constante sur le terrain, tous les efforts de formation et de technique de vente resteront stériles.", CalendarCheck, false, "%")
+        "L'assiduité totale et l'engagement sans faille de vos collaborateurs sur le terrain constituent le socle inébranlable de la réussite de l'agence. Une présence à 100% garantit une couverture optimale de vos secteurs et assure une réactivité maximale face aux opportunités du marché. Cette discipline collective est d'autant plus remarquable qu'elle témoigne d'une adhésion forte aux valeurs de l'entreprise et d'une motivation sans faille pour atteindre les objectifs communs. En vente directe, la présence est le seul facteur de succès que nous maîtrisons totalement, et l'agence en fait une démonstration exemplaire chaque jour. Cette fiabilité exemplaire permet d'instaurer une relation de confiance durable avec la clientèle locale qui apprécie la régularité et le sérieux du service proposé. Continuez à cultiver cet esprit de corps et cette rigueur professionnelle qui font la force de votre agence terrain de demain.",
+        "L'agence souffre d'une irrégularité de présence qui fragilise l'ensemble de sa dynamique commerciale. Les absences répétées, qu'elles soient justifiées ou non, brisent la continuité du service et empêchent l'exploitation méthodique des secteurs. En vente directe, chaque jour manqué est une opportunité de vente perdue qui ne se rattrapera jamais. Ce manque d'assiduité envoie également un signal négatif au reste de l'équipe et peut dégrader le moral collectif si aucune mesure n'est prise. Le management doit impérativement rappeler que la discipline de présence est le premier pilier de la réussite professionnelle dans notre métier. Il est nécessaire de mettre en place un suivi plus rigoureux du planning et de valoriser l'assiduité comme un critère de performance majeur. Sans une présence constante sur le terrain, tous les efforts de formation et de technique de vente resteront stériles pour l'agence.", 
+        CalendarCheck, false, "%")
     ];
   } else {
     // TEXTES COLLAB (450-500 caractères)
@@ -184,10 +190,10 @@ const runDetailedAudit = (averages, isAgency = false, topPerformers = []) => {
         "L'engagement client s'affaiblit systématiquement en fin de parcours, ce qui indique un manque de verrouillage lors des étapes précédentes. Vous arrivez souvent au closing face à des objections qui auraient dû être levées bien plus tôt. Il est nécessaire de travailler la reformulation et la validation par 'petits oui' tout au long de votre présentation. Si le client hésite au moment final, c'est que la valeur ajoutée perçue n'est pas assez forte.", Handshake, true),
       check(averages.rClosingBC, 2, "Closing / BC", "Clôture administrative parfaite.", "Vérifiez le processus BC.", 
         "Votre taux de transformation entre le closing moral et la saisie du bon de commande est exemplaire. Cela prouve que vous sécurisez parfaitement l'engagement du client et que vous maîtrisez l'aspect administratif sans créer de friction. Le client se sent accompagné jusqu'au bout, ce qui limite les rétractations précoces et les doutes post-achat. Cette rigueur dans la conclusion est le signe d'une grande confiance en soi absolue.",
-        "Trop de ventes validées oralement s'évaporent avant la signature définitive du bon de commande. Ce décalage suggère une baisse de tension ou un manque de professionnalisme au moment de sortir le document officiel. Le client ressent peut-être votre propre hésitation, ce qui réactive ses peurs. Assurez-vous d'avoir levé tous les derniers doutes et restez ferme dans votre posture de conseil jusqu'à la validation technique de la vente finale.", FileCheck, true),
+        "Trop de ventes validées oralement s'évaporent avant la signature définitive du bon de commande. Ce décalage suggère une baisse de tension ou un manque de professionnalisme au moment de sortir le document officiel. Le client ressent peut-être l'hésitation du collaborateur, ce qui réactive ses peurs. Assurez-vous d'avoir levé tous les derniers doutes et restez ferme dans votre posture de conseil jusqu'à la validation technique de la vente finale.", FileCheck, true),
       check(averages.valBC, 12, "BC / Jour", "Volume de production solide.", "Productivité à renforcer.", 
         "Votre productivité quotidienne est en parfaite adéquation avec les standards de rentabilité de l'agence. Ce volume régulier assure non seulement vos revenus, mais il témoigne aussi d'une gestion exemplaire de votre secteur et de votre énergie sur le terrain. En maintenant cette cadence, vous vous donnez les moyens d'amortir les jours plus difficiles et de surperformer lors des périodes de forte activité. Votre assiduité est votre moteur.",
-        "Votre volume moyen de commandes ne permet pas d'exploiter tout le potentiel de votre secteur géographique. Pour stabiliser vos résultats, vous devez impérativement augmenter votre nombre de passages ou optimiser radicalement vos ratios de transformation. Une productivité en retrait est souvent le signe d'une baisse d'intensité sur le terrain ou d'une mauvaise organisation de votre tournée. Fixez-vous des objectifs horaires très stricts.", Zap, false),
+        "Votre volume moyen de commandes ne permet pas d'exploiter tout le potentiel de votre secteur géographique. Pour stabiliser vos résultats, vous devez impérativement augmenter votre nombre de passages ou optimiser radicalement vos ratios de transformation. Une productivité en retrait est souvent le signe d'une baisse d'intensité sur le terrain ou d'une mauvaise organisation de votre tournée. Fixez-vous des objectifs horaires très stricts.", PenTool, false),
       check(averages.attendance, 100, "Présence", "Assiduité totale.", "Irrégularité pénalisante.", 
         "Votre engagement total sur le terrain est le fondement de votre réussite. Votre présence constante assure une couverture secteur optimale et renforce la crédibilité de l'agence auprès de vos clients qui apprécient la régularité du service. Cette fiabilité est indispensable pour construire un portefeuille client solide et fidèle sur le long terme. C'est votre sérieux qui fait la différence avec la concurrence terrain chaque jour.",
         "Vos absences répétées ou irrégulières brisent la dynamique commerciale indispensable à la tenue de votre secteur. Chaque jour manqué est une opportunité perdue et un signal négatif envoyé à votre clientèle qui attend de la régularité. En vente directe, le manque de présence est le premier facteur de chute des résultats, car il empêche la création d'un cercle vertueux de prospection. La discipline de présence est votre levier puissant.", CalendarCheck, false, "%")
@@ -200,7 +206,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
   return (
     <div id="print-target" className="bg-white text-left p-0 m-0">
       {/* PAGE AGENCE */}
-      <div className="print-page text-left">
+      <div className="print-page text-left border-b-8 border-blue-900 mb-8 pb-8">
         <div className="flex items-center justify-between mb-8 pb-4 border-b-2 border-blue-50">
           <div className="flex items-center gap-5">
             <ShieldCheck size={48} className="text-[#0033a0]"/>
@@ -218,20 +224,20 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
             <StatBox label="Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
             <StatBox label="Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={Handshake} />
             <StatBox label="Close/BC" value={dataSummary.agencyAvg.rClosingBC} threshold={2} isAverage={true} icon={FileCheck} />
-            <StatBox label="BC/J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
+            <StatBox label="BC/J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={PenTool} />
             <StatBox label="Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
           </div>
         </div>
         <div className="space-y-6 flex-1 text-left">
           <div className="p-8 bg-blue-50/50 border border-blue-100 rounded-[2rem]">
-            <div className="text-[9px] font-black text-[#0033a0] uppercase mb-4">Diagnostic Stratégique Collectif</div>
+            <div className="text-[9px] font-black text-[#0033a0] uppercase mb-4 text-left">Diagnostic Stratégique Collectif</div>
             <div className="space-y-4">
               {agencyAudit.map((item, i) => {
-                const IconComp = item.icon;
+                const IconComponent = item.icon;
                 return (
-                  <div key={`p-ag-${i}`} className="flex items-start gap-4">
+                  <div key={`p-ag-${i}`} className="flex items-start gap-4 text-left">
                     <div className={`mt-1 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
-                      {IconComp && <IconComp size={24} />}
+                      {IconComponent && <IconComponent size={24} />}
                     </div>
                     <div className="text-left text-left">
                       <span className="text-[9px] font-black uppercase opacity-40 block leading-none">{item.label}</span>
@@ -243,7 +249,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
               })}
             </div>
           </div>
-          <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[2rem]">
+          <div className="p-8 bg-emerald-50 border border-emerald-100 rounded-[2rem] text-left">
             <div className="text-[9px] font-black text-emerald-600 uppercase mb-4">Directives Stratégiques Agence</div>
             <p className="text-sm font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap">{agencyComment || "Poursuivez les efforts."}</p>
           </div>
@@ -256,9 +262,9 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
       {dataSummary.collabs.map((c) => {
         const audit = analysisResults[c.name] || [];
         return (
-          <div key={`p-collab-${c.name}`} className="print-page text-left text-left text-left">
+          <div key={`p-collab-${c.name}`} className="print-page text-left text-left text-left mb-10 pb-10 border-b border-slate-100">
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 text-left">
                 <div className="w-10 h-10 rounded-xl bg-[#0033a0] text-white flex items-center justify-center font-black text-lg">{c.name[0]}</div>
                 <div className="text-left">
                   <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900 leading-none">{c.name}</h3>
@@ -267,7 +273,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
               </div>
               <div className="text-right">
                 <p className="text-[9px] font-black text-slate-400 uppercase leading-none">Analyse du {today}</p>
-                <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 italic">{dataSummary.range}</p>
+                <p className="text-[8px] font-bold text-slate-300 uppercase mt-1 italic text-right">{dataSummary.range}</p>
               </div>
             </div>
             <div className="grid grid-cols-6 gap-2 mb-8 text-left text-left">
@@ -275,19 +281,19 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
               <StatBox label="Pres/Prosp" value={c.averages.rPresProsp} threshold={2} isMax={true} isAverage={true} icon={UserSearch} />
               <StatBox label="Prosp/Cl" value={c.averages.rProspClose} threshold={2} isMax={true} isAverage={true} icon={Handshake} />
               <StatBox label="Close/BC" value={c.averages.rClosingBC} threshold={2} isMax={true} isAverage={true} icon={FileCheck} />
-              <StatBox label="BC/J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
+              <StatBox label="BC/J" value={c.averages.valBC} threshold={12} isMax={false} isAverage={true} icon={PenTool} />
               <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} isAverage={false} suffix="%" icon={CalendarCheck} />
             </div>
             <div className="space-y-6 flex-1 text-left text-left">
               <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50">
                 <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left">Diagnostic Individuel Expert</div>
-                <div className="space-y-4">
+                <div className="space-y-4 text-left">
                   {audit.map((item, i) => {
-                    const IconComp = item.icon;
+                    const IconComponent = item.icon;
                     return (
                       <div key={`p-diag-${c.name}-${i}`} className="flex items-start gap-5">
                         <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
-                          {IconComp && <IconComp size={24} />}
+                          {IconComponent && <IconComponent size={24} />}
                         </div>
                         <div className="flex flex-col text-left">
                           <span className="text-[8px] font-black uppercase opacity-40 leading-none">{item.label}</span>
@@ -299,7 +305,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
                   })}
                 </div>
               </div>
-              <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left">
+              <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left text-left">
                 <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left text-left text-left">Commentaires Manager</div>
                 <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left text-left">{managerComments[c.name] || "Maintenez la rigueur."}</p>
               </div>
@@ -311,7 +317,7 @@ const ReportLayout = ({ today, dataSummary, agencyAudit, analysisResults, agency
   );
 };
 
-// --- MAIN APP ---
+// --- APPLICATION PRINCIPALE ---
 
 export default function App() {
   const [tab, setTab] = useState('import');
@@ -376,13 +382,13 @@ export default function App() {
   }, [rawDataEntries]);
 
   const dataSummary = useMemo(() => {
-    if (rawDataEntries.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "...", topPerformers: [] };
+    if (rawDataEntries.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "...", performers: [] };
     const filtered = rawDataEntries.filter(e => {
       const mMatch = selectedMonths.length === 0 || selectedMonths.includes(e.month);
       const wMatch = selectedWeeks.length === 0 || selectedWeeks.includes(`S${e.week}`);
       return mMatch && wMatch;
     });
-    if (filtered.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "Sélection vide", topPerformers: [] };
+    if (filtered.length === 0) return { count: 0, collabs: [], agencyAvg: {}, range: "Sélection vide", performers: [] };
 
     const map = {}; let agS = { po: 0, pr: 0, ps: 0, cl: 0, bc: 0, attD: 0, totD: 0 };
     filtered.forEach(e => {
@@ -403,8 +409,7 @@ export default function App() {
         cl: a.cl + (b.bc > 0 ? b.cl/b.bc : 0), 
         bc: a.bc + b.bc 
       }), { po: 0, pr: 0, ps: 0, cl: 0, bc: 0 });
-      
-      const weeksAtGoal = c.entries.filter(e => e.isPresent && e.bc >= 12).length;
+      const weeksAtGoal = worked.filter(e => e.bc >= 12).length;
 
       return { 
         name: c.name, 
@@ -422,13 +427,12 @@ export default function App() {
 
     const topPerformers = collabs.filter(c => c.weeksAtGoal > 0).map(c => ({ name: c.name, count: c.weeksAtGoal }));
     const agencyAvg = { rPortePres: agS.pr > 0 ? (agS.po / agS.pr).toFixed(2) : 0, rPresProsp: agS.ps > 0 ? (agS.pr / agS.ps).toFixed(2) : 0, rProspClose: agS.cl > 0 ? (agS.ps / agS.cl).toFixed(2) : 0, rClosingBC: agS.bc > 0 ? (agS.cl / agS.bc).toFixed(2) : 0, valBC: agS.attD > 0 ? (agS.bc / agS.attD).toFixed(1) : 0, attendance: agS.totD > 0 ? Math.round((agS.attD / agS.totD) * 100) : 0 };
-    
-    return { count: collabs.length, collabs, agencyAvg, topPerformers, range: `${selectedMonths.length > 0 ? selectedMonths.join(', ') : 'Période complète'} | ${selectedWeeks.length > 0 ? selectedWeeks.join(', ') : 'Toutes semaines'}` };
+    return { count: collabs.length, collabs, agencyAvg, range: `${selectedMonths.length > 0 ? selectedMonths.join(', ') : 'Période complète'} | ${selectedWeeks.length > 0 ? selectedWeeks.join(', ') : 'Toutes semaines'}`, performers: topPerformers };
   }, [rawDataEntries, selectedMonths, selectedWeeks]);
 
   const handleAnalyse = () => {
     setLoading(true);
-    const agRes = runDetailedAudit(dataSummary.agencyAvg, true, dataSummary.topPerformers);
+    const agRes = runDetailedAudit(dataSummary.agencyAvg, true, dataSummary.performers);
     setAgencyAudit(agRes);
     const results = {};
     dataSummary.collabs.forEach(c => { results[c.name] = runDetailedAudit(c.averages, false); });
@@ -444,7 +448,7 @@ export default function App() {
     if (!win) { alert("Autorisez les pop-ups."); return; }
     win.document.write(`<html><head>${document.head.innerHTML}<style>
       body { background: white; margin: 0; padding: 0; }
-      .print-page { width: 210mm; height: 296mm; padding: 15mm; display: flex; flex-direction: column; box-sizing: border-box; page-break-after: always !important; background: white !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; text-align: left; }
+      .print-page { width: 210mm; height: 296mm; padding: 15mm; display: flex; flex-direction: column; box-sizing: border-box; background: white !important; text-align: left; }
     </style></head><body>${target.innerHTML}</body></html>`);
     win.document.close(); win.focus();
     setTimeout(() => { win.print(); win.close(); }, 500);
@@ -467,48 +471,48 @@ export default function App() {
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans text-left text-sm">
       <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white rounded-xl shadow-lg"><ShieldCheck className="#0033a0" size={20} style={{ color: '#0033a0' }} /></div>
+          <div className="p-2 bg-white rounded-xl shadow-lg"><ShieldCheck style={{ color: '#0033a0' }} size={20} /></div>
           <div><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase">v60.0 Stable</span></div>
         </div>
-        <nav className="flex flex-col gap-1.5 text-left">
+        <nav className="flex flex-col gap-1.5 text-left text-left">
           <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Source de données" />
           <SidebarLink active={tab==='analyse'} onClick={() => setTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Audit Stratégique" disabled={dataSummary.count === 0}/>
           <SidebarLink active={tab==='config'} onClick={() => setTab('config')} icon={<ListTodo size={16}/>} label="Directives Coaching" />
         </nav>
         <div className="mt-auto pt-6 border-t border-white/10 text-left">
           <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2"><Scale size={12}/> Seuils Cibles</h3>
-          <div className="space-y-1.5 text-left">
-            <RuleItem label="Porte / Pres" target="≤ 3" icon={DoorOpen} /><RuleItem label="Pres / Prosp" target="≤ 2" icon={UserSearch} /><RuleItem label="Prosp / Close" target="≤ 2" icon={Handshake} /><RuleItem label="Close / BC" target="≤ 2" icon={FileCheck} /><RuleItem label="Volume BC / J" target="≥ 12" icon={Zap} /><RuleItem label="Présence" target="100%" icon={CalendarCheck} />
+          <div className="space-y-1.5">
+            <RuleItem label="Porte / Pres" target="≤ 3" icon={DoorOpen} /><RuleItem label="Pres / Prosp" target="≤ 2" icon={UserSearch} /><RuleItem label="Prosp / Close" target="≤ 2" icon={Handshake} /><RuleItem label="Close / BC" target="≤ 2" icon={FileCheck} /><RuleItem label="Volume BC / J" target="≥ 12" icon={PenTool} /><RuleItem label="Présence" target="100%" icon={CalendarCheck} />
           </div>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left">
-        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10">
+        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left text-left">
           <div className="flex items-center gap-4 text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0]">Dashboard du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">Management v60</span>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none">v60.0 Stable</span>
           </div>
           <div className="flex gap-2">
             {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all"><Trash2 size={18}/></button>}
-            <button onClick={handlePrintAction} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[10px] shadow hover:bg-slate-200 transition-all text-left"><Printer size={14}/> Imprimer</button>
+            <button onClick={handlePrintAction} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-bold uppercase text-[10px] shadow hover:bg-slate-200 transition-all"><Printer size={14}/> Imprimer</button>
             <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left"><Eye size={14}/> Aperçu & PDF</button>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 print:p-0">
           {tab === 'import' && (
-            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left">
+            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left text-left text-left">
               <div className={cardClass}>
                 <div className="flex items-center gap-3 mb-6"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900">Import des données</h3></div>
                 <textarea className="w-full h-40 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
                 
                 {dataSummary.count > 0 && (
                   <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl mb-8 animate-in zoom-in duration-300">
-                    <div className="bg-white p-2 rounded-lg shadow-sm"><Users className="text-[#0033a0]" size={20} /></div>
+                    <div className="bg-white p-2 rounded-lg shadow-sm"><Users style={{ color: '#0033a0' }} size={20} /></div>
                     <div>
-                      <p className="text-[10px] font-black text-[#0033a0] uppercase tracking-widest leading-none">Analyse nominative</p>
+                      <p className="text-[10px] font-black text-[#0033a0] uppercase tracking-widest leading-none text-left">Analyse nominative</p>
                       <p className="text-sm font-bold text-slate-700 mt-1">Le système a identifié <span className="text-[#0033a0] font-black">{dataSummary.count}</span> collaborateur(s) prêt(s) pour l'audit stratégique.</p>
                     </div>
                   </div>
@@ -526,23 +530,23 @@ export default function App() {
           {tab === 'analyse' && (
             <div className="max-w-6xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left">
               {/* BILAN AGENCE ÉCRAN */}
-              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left">
-                <div className="flex items-center gap-4 mb-8 text-left">
+              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left text-left text-left">
+                <div className="flex items-center gap-4 mb-8 text-left text-left">
                   <div className="p-3 bg-white/10 rounded-2xl border border-white/20"><Building2 size={28}/></div>
-                  <div><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2">Performance consolidée ({dataSummary.range})</p></div>
+                  <div><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left">Bilan Agence Global</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left">Performance consolidée ({dataSummary.range})</p></div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left">
                   <StatBox label="Moy. Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
                   <StatBox label="Moy. Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
                   <StatBox label="Moy. Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={Handshake} />
                   <StatBox label="Moy. Close/BC" value={dataSummary.agencyAvg.rClosingBC} threshold={2} isAverage={true} icon={FileCheck} />
-                  <StatBox label="Moy. BC / J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={Zap} />
+                  <StatBox label="Moy. BC / J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={PenTool} />
                   <StatBox label="Moy. Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6">
-                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left"><Activity size={14}/> Diagnostic Automatique</div>
-                    <div className="space-y-4">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left">
+                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left"><Activity size={14}/> Diagnostic Automatique</div>
+                    <div className="space-y-4 text-left text-left text-left text-left">
                       {agencyAudit.map((item, i) => {
                         const IconComponent = item.icon;
                         return (
@@ -550,17 +554,17 @@ export default function App() {
                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-400 text-emerald-900' : 'bg-rose-400 text-rose-900'}`}>
                                 {IconComponent && <IconComponent size={28} />}
                              </div>
-                             <div className="text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic">{item.numericalDetail}</p></div>
+                             <div className="text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p><p className="text-[10px] opacity-70 mt-1 italic text-left">{item.numericalDetail}</p></div>
                           </div>
                         );
                       })}
                     </div>
                   </div>
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left">
-                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px]">
+                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
+                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[200px] text-left text-left text-left">
                         {agencyComment ? (
-                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left">{agencyComment}</p>
+                           <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left">{agencyComment}</p>
                         ) : (
                            <p className="text-blue-200/50 text-xs italic text-left">Saisissez vos directives dans l'onglet coaching.</p>
                         )}
@@ -572,21 +576,21 @@ export default function App() {
               {/* COLLABORATEURS ÉCRAN */}
               {dataSummary.collabs.map((c) => (
                 <div key={`card-${c.name}`} className={cardClass}>
-                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left">
+                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left">
                     <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left">{c.name[0]}</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left">{c.name}</h3>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left">{c.name}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} icon={DoorOpen} />
                     <StatBox label="Pres / Prosp" value={c.averages.rPresProsp} threshold={2} icon={UserSearch} />
                     <StatBox label="Prosp / Cl" value={c.averages.rProspClose} threshold={2} icon={Handshake} />
                     <StatBox label="Close / BC" value={c.averages.rClosingBC} threshold={2} icon={FileCheck} />
-                    <StatBox label="BC / J" value={c.averages.valBC} threshold={12} isMax={false} icon={Zap} />
+                    <StatBox label="BC / J" value={c.averages.valBC} threshold={12} isMax={false} icon={PenTool} />
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" icon={CalendarCheck} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
-                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left">
-                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
+                    <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif</div>
                       <div className="space-y-4">
                         {(analysisResults[c.name] || []).map((item, i) => {
                           const IconComp = item.icon;
@@ -595,14 +599,14 @@ export default function App() {
                               <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                                  {IconComp && <IconComp size={28} />}
                               </div>
-                              <div className="text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left text-left text-left">{item.numericalDetail}</p></div>
+                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-1 italic leading-relaxed text-left text-left text-left text-left">{item.numericalDetail}</p></div>
                             </div>
                           );
                         })}
                       </div>
                     </div>
-                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left">
-                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
+                    <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager</div>
                       <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder="Conseils personnalisés (500 chars max)..." maxLength={500}/>
                     </div>
                   </div>
@@ -612,24 +616,24 @@ export default function App() {
           )}
 
           {tab === 'config' && (
-            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left">
+            <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left">
               <div className={cardClass}>
-                 <div className="flex items-center gap-4 mb-8 text-left text-left">
-                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left">Directives Agence Globales</h3>
+                 <div className="flex items-center gap-4 mb-8 text-left text-left text-left">
+                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left">Directives Agence Globales</h3>
                  </div>
                  <CoachingTextarea label="Message global (Page 1 du rapport)" value={agencyComment} onChange={setAgencyComment} placeholder="Objectifs globaux pour l'agence (850 chars max)..." maxLength={850}/>
               </div>
-              <div className="space-y-4 text-left text-left">
-                 <div className="flex items-center gap-4 mb-6 text-left">
-                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left"><UserCog size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left">Commentaires par Collaborateur</h3>
+              <div className="space-y-4 text-left text-left text-left text-left">
+                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left">
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left">Commentaires par Collaborateur</h3>
                  </div>
                  {dataSummary.collabs.map(c => (
-                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left">
-                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left">
-                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left">{c.name[0]}</div>
-                          <span className="font-black uppercase text-slate-900 tracking-tight">{c.name}</span>
+                    <div key={`central-${c.name}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left">
+                       <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left">{c.name[0]}</div>
+                          <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left">{c.name}</span>
                        </div>
                        <CoachingTextarea value={managerComments[c.name]} onChange={(val) => setManagerComments(prev => ({...prev, [c.name]: val}))} placeholder={`Conseils pour ${c.name}...`} maxLength={500}/>
                     </div>
@@ -640,32 +644,32 @@ export default function App() {
         </div>
       </main>
 
-      {/* MODAL APERÇU PDF */}
+      {/* MODAL APERÇU PDF (GARANTIT innerHTML != null) */}
       {showPdf && (
-        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left">
-          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left">
-            <div className="flex items-center gap-3 text-left">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left"><Printer size={20}/></div>
-              <span className="font-black uppercase tracking-widest italic text-xs text-left">Aperçu du Dossier Executive</span>
+        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left">
+          <div className="flex justify-between text-white mb-4 px-4 max-w-7xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
+              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu du Dossier Executive</span>
             </div>
-            <div className="flex items-center gap-4 text-left text-left">
-               <button onClick={handlePrintAction} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left">Impression Système</button>
-               <div className="flex flex-col gap-1 text-left text-left text-left">
-                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
-                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
+            <div className="flex items-center gap-4 text-left text-left text-left text-left text-left">
+               <button onClick={handlePrintAction} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left text-left text-left">Impression Système</button>
+               <div className="flex flex-col gap-1 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                  <button onClick={exportToPDF} disabled={isExporting} className="px-6 py-3 bg-emerald-500 text-white font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-emerald-600 transition-all disabled:opacity-50 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{isExporting ? <Loader2 className="animate-spin" size={16}/> : <FileDown size={16}/>} Générer PDF</button>
+                  {downloadUrl && <a href={downloadUrl} download={`Audit_${today}.pdf`} className="text-[9px] text-emerald-300 font-bold underline flex items-center gap-1 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><ExternalLink size={10}/> Télécharger le PDF</a>}
                </div>
-               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
+               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left">
-            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+            <div className="bg-white shadow-2xl w-[210mm] p-0 shadow-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
                <ReportLayout today={today} dataSummary={dataSummary} agencyAudit={agencyAudit} analysisResults={analysisResults} agencyComment={agencyComment} managerComments={managerComments} />
             </div>
           </div>
         </div>
       )}
 
-      {/* CACHÉ POUR L'ACCÈS AU DOM D'IMPRESSION */}
+      {/* CONTENEUR CACHÉ POUR L'IMPRESSION (GARANTIT innerHTML != null) */}
       <div className="hidden">
          <ReportLayout today={today} dataSummary={dataSummary} agencyAudit={agencyAudit} analysisResults={analysisResults} agencyComment={agencyComment} managerComments={managerComments} />
       </div>
@@ -674,6 +678,7 @@ export default function App() {
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 20px; }
         .print-page { width: 210mm; height: 296mm; padding: 15mm; display: flex; flex-direction: column; box-sizing: border-box; background: white !important; text-align: left; }
+        .page-separator-preview { border-style: dashed; }
         @media print {
           @page { size: A4 portrait; margin: 0; }
           body { background: white !important; }
