@@ -139,7 +139,7 @@ const getAuditResult = (averages, isAgency, topPerformers = []) => {
     const targetDisp = isMax ? `≤ ${threshold}${suffix}` : `≥ ${threshold}${suffix}`;
     return {
       label, met, icon, summary: met ? successMsg : failMsg,
-      numericalDetail: `Diagnostic : ${met ? passArg : failArg} (Observé : ${valDisp} / Cible : ${targetDisp}).`
+      numericalDetail: `Diagnostic Expert : ${met ? passArg : failArg} (Observé : ${valDisp} / Cible : ${targetDisp}).`
     };
   };
 
@@ -153,7 +153,7 @@ const getAuditResult = (averages, isAgency, topPerformers = []) => {
         "L'analyse globale de la performance de l'agence sur le ratio Portes/Présents met en lumière une compréhension stratégique exceptionnelle de la gestion des secteurs géographiques. Vos équipes démontrent une capacité remarquable à synchroniser leurs passages avec les pics de présence des prospects au domicile, ce qui constitue le premier levier de rentabilité de notre activité de vente directe. Cette efficacité chirurgicale dans l'approche initiale permet non seulement de réduire l'épuisement physique des collaborateurs sur le terrain, mais elle garantit également une fluidité maximale tout au long du cycle de vente. En identifiant avec une telle précision les créneaux horaires les plus porteurs, l'agence optimise ses ressources et maximise les opportunités de présentation qualitative. Il est impératif de maintenir ce niveau d'exigence dans le ciblage pour pérenniser ce succès collectif sur le long terme de l'agence Executive pour l'avenir durable de la structure commerciale complète.",
         "Le ratio Portes/Présents actuel de l'agence révèle un déficit critique dans l'organisation tactique des tournées sur le terrain. Un nombre trop important d'ouvertures de portes ne débouche pas sur un temps d'écoute, ce qui suggère une inadéquation flagrante entre les horaires de passage et les habitudes de vie des prospects ciblés par la structure. Pour redresser la situation, il est impératif d'opérer une refonte de la stratégie de passage en privilégiant les créneaux de fin de journée ou les mercredi après-midi, moments où la disponibilité mentale des clients est maximale. L'agence doit également renforcer la formation de ses équipes sur l'accroche de 'pas de porte' pour instaurer un climat de confiance immédiat dès les premières secondes de l'interaction. Sans une correction rapide de ce premier indicateur, l'ensemble de l'entonnoir de vente globale de l'agence Executive restera sous-performant pour le moment.", DoorOpen, true),
       check(averages.rPresProsp, 2, "Présents / Prospects", "Expertise en découverte client.", "Phase de découverte courte.", 
-        "L'agence affiche une maîtrise technique impressionnante lors de la phase cruciale de découverte client, transformant les simples présences en prospects qualifiés avec une régularité exemplaire. Cette étape, qui est souvent le point de rupture dans le cycle de vente, est ici gérée avec une finesse psychologique qui honore le professionnalisme de vos équipes. En posant les bonnes questions ouvertes et en pratiquant une écoute active rigoureuse, vos collaborateurs parviennent à extraire les besoins latents des foyers pour les transformer en opportunités concrètes. Cette capacité à créer de la valeur perçue dès les premières minutes de l'entretien est le socle sur lequel repose votre croissance actuelle. Il est fondamental de continuer à valoriser cette approche qualitative du métier, car elle réduit mécaniquement le taux de refus lors du closing final. Le niveau d'expertise est ici validé pour tout le groupe terrain actuel Executive pour le futur.",
+        "L'agence affiche une maîtrise technique impressionnante lors de la phase cruciale de découverte client, transformant les simples présences en prospects qualifiés avec une régularité exemplaire. Cette étape, qui est souvent le point de rupture dans le cycle de vente, est ici gérée avec une finesse psychologique qui honore le professionnalisme de vos équipes. En posant les bonnes questions ouvertes et en pratiquant une écoute active rigoureuse, vos collaborateurs parviennent à extraire les besoins latents des foyers pour les transformer en opportunités concrètes. Cette capacité à créer de la valeur perçue dès les premières minutes de l'entretien est le socle sur lequel repose votre croissance automatique. Il est fondamental de continuer à valoriser cette approche qualitative du métier, car elle réduit mécaniquement le taux de refus lors du closing final. Le niveau d'expertise est ici validé pour tout le groupe terrain actuel Executive pour le futur de la boîte.",
         "Le diagnostic sur la transformation des présents en prospects indique une fragilité dans la phase de découverte collective de l'agence. Actuellement, le discours semble trop orienté vers la présentation produit plutôt que vers l'exploration des besoins réels du client final. Pour optimiser ce ratio, il est nécessaire de réinjecter de l'empathie et de la curiosité dans l'échange. Un prospect qui ne se projette pas ne signera jamais de bon de commande. Le management doit impérativement organiser des ateliers de jeux de rôles focalisés sur la reformulation et l'identification des points de douleur des foyers. Si vos équipes ne parviennent pas à convaincre de l'utilité du service à ce stade, tout le processus de closing sera irrémédiablement compromis. Il s'agit ici d'un levier de conversion majeur à activer d'urgence pour stabiliser les résultats mensuels et garantir la progression du chiffre d'affaires global de la structure actuelle Executive.", UserSearch, true),
       check(averages.rProspClose, 2, "Prospects / Closing", "Cycle de closing optimisé.", "Perte d'efficacité au closing.", 
         "La fluidité observée entre la phase de qualification des prospects et la conclusion des ventes témoigne d'un haut niveau de maturité commerciale au sein de l'agence. Vos équipes ne se contentent pas de présenter des offres ; elles accompagnent les clients vers une décision naturelle en verrouillant chaque étape de l'argumentaire. Cette transition fluide est le résultat d'un travail méticuleux sur la levée des objections en amont, évitant ainsi les confrontations stériles en fin de parcours. Le client se sent écouté et compris, ce qui facilite grandement l'engagement psychologique nécessaire à la validation de la commande. Cette efficacité dans la transformation est un avantage concurrentiel majeur pour l'agence, permettant d'optimiser le temps passé sur le terrain et de maximiser le retour sur investissement de chaque tournée. Maintenez ce focus permanent sur la validation progressive des étapes clés pour réussir durablement cette année.",
@@ -174,7 +174,7 @@ const getAuditResult = (averages, isAgency, topPerformers = []) => {
     return [
       check(averages.rPortePres, 3, "Portes / Présents", "L'accroche est excellente.", "Taux de présence insuffisant.", "Votre maîtrise du ratio Portes/Présents démontre une excellente lecture de vos secteurs. Vous savez manifestement identifier les moments et les lieux où les prospects sont présents et disposés à vous écouter. Cette efficacité dans l'approche vous permet de maximiser votre temps de présentation sans gaspiller d'énergie sur des refus. C'est un atout majeur qui fluidifie tout le reste de votre entonnoir de vente actuel. Maintenez cette rigueur.", "Un ratio Portes/Présents trop élevé indique souvent que vous ne trouvez pas assez de personnes ou que vous n'arrivez pas à transformer l'ouverture de porte en temps d'écoute. Pour corriger cela, optimisez vos tournées en ciblant les horaires stratégiques. Travaillez aussi votre accroche de 'pas de porte' : l'objectif est de rassurer immédiatement pour que le client accepte votre présence. Soyez plus observateur sur les signes de vie au foyer.", DoorOpen, true),
       check(averages.rPresProsp, 2, "Présents / Prospects", "Découverte maîtrisée.", "Phase de découverte courte.", "Votre capacité à transformer un présent en prospect montre que vous savez identifier avec précision les besoins réels du foyer durant votre présentation. En posant les bonnes questions ouvertes, vous amenez le client à verbaliser ses attentes, ce qui facilite grandement la suite du processus. Vous ne faites pas qu'exposer des produits, vous apportez des solutions concrètes. Continuez à soigner cette étape cruciale de qualification.", "Vous présentez nos services mais vous ne parvenez pas assez à convaincre de leur utilité. Il est crucial de passer plus de temps sur la phase de découverte pour isoler les habitudes de consommation du foyer. Actuellement, votre discours semble trop générique et ne crée pas assez d'impact émotionnel ou pratique chez le client. Travaillez sur l'écoute active : laissez le client s'exprimer davantage pour pouvoir rebondir sur ses besoins.", UserSearch, true),
-      check(averages.rProspClose, 2, "Prospects / Closing", "Transformation fluide.", "Engagement client fragile.", "Votre sélection qualitative des prospects en amont garantit une transition naturelle vers la vente. Vous savez trier les profils dès le départ, ce qui vous évite de perdre du temps sur des négociations stériles. Votre force réside dans la validation progressive des étapes de vente : quand vous arrivez au closing, le client est déjà convaincu psychologiquement. Cette fluidité réduit votre fatigue mentale et renforce votre image d'expert.", "L'engagement client s'affaiblit systématiquement en fin de parcours, ce qui indique un manque de verrouillage lors des étapes précédentes. Vous arrivez souvent au closing face à des objections qui auraient dû être levées bien plus tôt. Il est nécessaire de travailler la reformulation et la validation par 'petits oui' tout au long de votre présentation. Si le client hésite au moment final, c'est que la valeur ajoutée perçue n'est pas assez forte.", Handshake, true),
+      check(averages.rProspClose, 2, "Prospects / Closing", "Transformation fluide.", "Engagement client fragile.", "Votre sélection qualitative des prospects en amont garantit une transition naturelle vers la vente. Vous savez trier les profils dès le départ, ce qui vous évite de perdre du temps sur des négociations stériles. Votre force réside dans la validation progressive des étapes de vente : quand vous arrivez au closing, le client est déjà convaincu psychologiquement. Cette fluidité réduit votre fatigue mentale et renforce votre image d'expert.", "L'engagement client s'affaiblit systématiquement en fin de parcours, ce qui indique un manque de verrouillage lors des étapes précédentes. Vous arrivez souvent au closing face à des objections que vous auriez dû traiter bien plus tôt. Il est nécessaire de travailler la reformulation et la validation par 'petits oui' tout au long de votre présentation. Si le client hésite au moment final, c'est que la valeur ajoutée perçue n'est pas assez forte.", Handshake, true),
       check(averages.rClosingBC, 2, "Closing / BC", "Clôture administrative parfaite.", "Vérifiez le processus BC.", "Votre taux de transformation entre le closing moral et la saisie du bon de commande est exemplaire. Cela prouve que vous sécurisez parfaitement l'engagement du client et que vous maîtrisez l'aspect administratif sans créer de friction. Le client se sent accompagné jusqu'au bout, ce qui limite les rétractations précoces et les doutes post-achat. Cette rigueur dans la conclusion est le signe d'une grande confiance en soi absolue.", "Trop de ventes validées oralement s'évaporent avant la signature définitive du bon de commande. Ce décalage suggère une baisse de tension ou un manque de professionnalisme au moment de sortir le document officiel. Le client ressent peut-être l'hésitation du collaborateur, ce qui réactive ses peurs. Assurez-vous d'avoir levé tous les derniers doutes et restez ferme dans votre posture de conseil jusqu'à la validation technique de la vente finale.", FileCheck, true),
       check(averages.valBC, 12, "BC / Jour", "Volume de production solide.", "Productivité à renforcer.", "Votre productivité quotidienne est en parfaite adéquation avec les standards de rentabilité de l'agence. Ce volume régulier assure non seulement vos revenus, mais il témoigne aussi d'une gestion exemplaire de votre secteur et de votre énergie sur le terrain. En maintenant cette cadence, vous vous donnez les moyens d'amortir les jours plus difficiles et de surperformer lors des périodes de forte activité. Votre assiduité est votre moteur.", "Votre volume moyen de commandes ne permet pas d'exploiter tout le potentiel de votre secteur géographique. Pour stabiliser vos résultats, vous devez impérativement augmenter votre nombre de passages ou optimiser radicalement vos ratios de transformation. Une productivité en retrait est souvent le signe d'une baisse d'intensité sur le terrain ou d'une mauvaise organisation de votre tournée.", PenTool, false),
       check(averages.attendance, 100, "Présence", "Assiduité totale.", "Irrégularité pénalisante.", "Votre engagement total sur le terrain est le fondement de votre réussite. Votre présence constante assure une couverture secteur optimale et renforce la crédibilité de l'agence auprès de vos clients qui apprécient la régularité du service. Cette fiabilité est indispensable pour construire un portefeuille client solide et fidèle sur le long terme. C'est votre sérieux qui fait la différence avec la concurrence terrain chaque jour.", "Vos absences répétées ou irrégulières brisent la dynamique commerciale indispensable à la tenue de votre secteur. Chaque jour manqué est une opportunité perdue et un signal négatif envoyé à votre clientèle qui attend de la régularité. En vente directe, le manque de présence est le premier facteur de chute des résultats, car il empêche la création d'un cercle vertueux de prospection. La discipline de présence est votre levier puissant.", CalendarCheck, false, "%")
@@ -297,12 +297,12 @@ const ReportLayout = ({ dataSummary, agencyAudit, analysisResults, agencyComment
             </div>
             <div className="space-y-6 flex-1 text-left text-left text-left">
               <div className="p-6 bg-slate-50/50 rounded-[1.5rem] border border-blue-50 text-left">
-                <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left">Diagnostic Individuel Expert</div>
+                <div className="text-[8px] font-black text-[#0033a0] uppercase mb-4 tracking-widest text-left text-left">Diagnostic Individuel Expert</div>
                 <div className="space-y-4">
                   {audit.map((item, i) => {
                     const IconComponent = item.icon;
                     return (
-                      <div key={`diag-p-row-${normKey}-${i}`} className="flex items-start gap-5">
+                      <div key={`diag-p-row-${normKey}-${i}`} className="flex items-start gap-5 text-left">
                         <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                           {IconComponent && <IconComponent size={24} />}
                         </div>
@@ -423,26 +423,26 @@ export default function App() {
 
   return (
     <div className="flex h-screen bg-white text-slate-900 overflow-hidden font-sans text-left text-sm text-left">
-      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left">
+      <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left text-left">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-white rounded-xl shadow-lg text-left"><ShieldCheck style={{ color: '#0033a0' }} size={20} /></div>
-          <div className="text-left text-left"><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left text-left">v60.14 Diagnostic</span></div>
+          <div className="p-2 bg-white rounded-xl shadow-lg text-left text-left"><ShieldCheck style={{ color: '#0033a0' }} size={20} /></div>
+          <div className="text-left text-left text-left"><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left text-left text-left">v60.14 Diagnostic</span></div>
         </div>
         <nav className="flex flex-col gap-1.5 text-left text-left text-left">
           <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Données Source" />
           <SidebarLink active={tab==='analyse'} onClick={() => setTab('analyse')} icon={<LayoutDashboard size={16}/>} label="Diagnostic Stratégique" disabled={dataSummary.count === 0}/>
           <SidebarLink active={tab==='config'} onClick={() => setTab('config')} icon={<ListTodo size={16}/>} label="Directives Coaching" />
         </nav>
-        <div className="mt-auto pt-6 border-t border-white/10 text-left">
+        <div className="mt-auto pt-6 border-t border-white/10 text-left text-left">
           <h3 className="text-[10px] font-black text-blue-200 uppercase tracking-widest mb-4 flex items-center gap-2"><Scale size={12}/> Seuils Cibles</h3>
-          <div className="space-y-1.5 text-left text-left">
+          <div className="space-y-1.5 text-left text-left text-left">
             <RuleItem label="Porte / Pres" target="≤ 3" icon={DoorOpen} /><RuleItem label="Pres / Prosp" target="≤ 2" icon={UserSearch} /><RuleItem label="Prosp / Close" target="≤ 2" icon={Handshake} /><RuleItem label="Close / BC" target="≤ 2" icon={FileCheck} /><RuleItem label="Volume BC / J" target="≥ 12" icon={PenTool} /><RuleItem label="Présence" target="100%" icon={CalendarCheck} />
           </div>
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left">
-        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left">
+      <main className="flex-1 flex flex-col overflow-hidden relative bg-[#F4F7FF] print:bg-white text-left text-left">
+        <header className="h-16 bg-white border-b border-blue-100 px-8 flex items-center justify-between shrink-0 print:hidden z-10 text-left text-left">
           <div className="flex items-center gap-4 text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0] text-left text-left">Diagnostic du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
@@ -450,18 +450,18 @@ export default function App() {
           </div>
           <div className="flex gap-2">
             {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all text-left text-left"><Trash2 size={18}/></button>}
-            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left text-left text-left"><Eye size={14}/> Aperçu & PDF</button>
+            <button onClick={()=>setShowPdf(true)} disabled={dataSummary.count === 0} className="flex items-center gap-2 px-5 py-2.5 bg-[#0033a0] text-white rounded-xl font-bold uppercase text-[10px] shadow-xl hover:bg-blue-800 transition-all uppercase text-left text-left text-left text-left"><Eye size={14}/> Aperçu & PDF</button>
           </div>
         </header>
 
         <div className="flex-1 overflow-y-auto p-8 print:p-0">
           {tab === 'import' && (
-            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left text-left">
+            <div className="max-w-4xl mx-auto space-y-6 animate-in fade-in duration-500 text-left text-left text-left">
               <div className={CARD_CLASS}>
                 <div className="flex items-center gap-3 mb-6 text-left text-left text-left text-left"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left">Chargement Données Source</h3></div>
                 <textarea className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left text-left text-left text-left text-left text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left text-left text-left text-left">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left text-left text-left text-left text-left">
                     <MultiSelectDropdown label="Filtrer par Mois" options={availableFilters.months} selected={selectedMonths} onToggle={(v)=>setSelectedMonths(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Filter}/>
                     <MultiSelectDropdown label="Filtrer par Semaine" options={availableFilters.weeks} selected={selectedWeeks} onToggle={(v)=>setSelectedWeeks(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Calendar}/>
                 </div>
@@ -472,10 +472,10 @@ export default function App() {
 
           {tab === 'analyse' && (
             <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left text-left text-left">
-              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left text-left text-left text-left">
-                <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left">
-                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left"><Building2 size={28}/></div>
-                  <div className="text-left text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left text-left text-left">Bilan Diagnostic Agence</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left text-left text-left text-left">Portrait de Performance ({dataSummary.range})</p></div>
+              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left text-left text-left text-left text-left">
+                <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left text-left">
+                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left text-left text-left"><Building2 size={28}/></div>
+                  <div className="text-left text-left text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left text-left text-left">Bilan Diagnostic Agence</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left text-left text-left text-left text-left">Portrait de Performance ({dataSummary.range})</p></div>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left">
                   <StatBox label="Moy. Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
@@ -485,10 +485,10 @@ export default function App() {
                   <StatBox label="Moy. BC / J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={PenTool} />
                   <StatBox label="Moy. Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 text-left">
-                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left text-left text-left text-left">
-                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Automatique Complet</div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 text-left text-left">
+                  <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left text-left text-left text-left text-left">
+                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Automatique Complet</div>
+                    <div className="grid grid-cols-1 gap-4">
                       {agencyAudit.map((item, i) => {
                         const IconComp = item.icon;
                         return (
@@ -496,14 +496,14 @@ export default function App() {
                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-400 text-emerald-900' : 'bg-rose-400 text-rose-900'}`}>
                                 {IconComp && <IconComp size={20} />}
                              </div>
-                             <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p></div>
+                             <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p><p className="text-[10px] opacity-80 mt-2 italic leading-relaxed">{item.numericalDetail}</p></div>
                           </div>
                         );
                       })}
                     </div>
                   </div>
-                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left text-left text-left text-left text-left">
-                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
+                  <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left text-left text-left text-left">
+                     <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
                      <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[150px] text-left">
                         {agencyComment ? (
                            <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left">{agencyComment}</p>
@@ -517,11 +517,11 @@ export default function App() {
 
               {dataSummary.collabs.map((c) => (
                 <div key={`card-diag-col-${c.name}`} className={CARD_CLASS}>
-                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left text-left text-left">
-                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left">{c.name[0]}</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left">{c.name}</h3>
+                  <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left text-left text-left text-left">
+                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left text-left">{c.name[0]}</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left">{c.name}</h3>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left">
+                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} icon={DoorOpen} />
                     <StatBox label="Pres / Prosp" value={c.averages.rPresProsp} threshold={2} icon={UserSearch} />
                     <StatBox label="Prosp / Cl" value={c.averages.rProspClose} threshold={2} icon={Handshake} />
@@ -529,9 +529,25 @@ export default function App() {
                     <StatBox label="BC / J" value={c.averages.valBC} threshold={12} isMax={false} icon={PenTool} />
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" icon={CalendarCheck} />
                   </div>
-                  <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left">
-                    <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager Nominatives</div>
-                    <p className="text-sm font-bold text-emerald-900 italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left text-left">{managerComments[c.name.toLowerCase().replace(/\s/g, '')] || "Saisissez vos conseils dans l'onglet coaching."}</p>
+                  <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner mb-6 text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif Complet</div>
+                      <div className="space-y-4">
+                        {(analysisResults[c.name] || []).map((item, i) => {
+                          const IconC = item.icon;
+                          return (
+                            <div key={`diag-res-v-${c.name}-${i}`} className={`p-4 rounded-2xl border flex items-start gap-4 transition-all ${item.met ? 'bg-white border-emerald-100' : 'bg-rose-50/50 border-rose-100'}`}>
+                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
+                                 {IconC && <IconC size={20} />}
+                              </div>
+                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-2 italic leading-relaxed text-left text-left text-left">{item.numericalDetail}</p></div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                  </div>
+                  <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left text-left">
+                    <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager Nominatives</div>
+                    <p className="text-sm font-bold text-emerald-900 italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left">{managerComments[c.name.toLowerCase().replace(/\s/g, '')] || "Saisissez vos conseils dans l'onglet coaching."}</p>
                   </div>
                 </div>
               ))}
@@ -542,14 +558,14 @@ export default function App() {
             <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left text-left text-left">
               <div className={CARD_CLASS}>
                  <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
+                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
                  </div>
                  <CoachingTextarea label="Message global (Affiché Diagnostic Page 2)" value={agencyComment} onChange={setAgencyComment} placeholder="Objectifs globaux (850 chars max)..." maxLength={850}/>
               </div>
               <div className="space-y-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
                  <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
                     <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Diagnostic & Coaching par Collaborateur</h3>
                  </div>
                  {[...new Set(rawEntries.map(e => e.name))].map(name => {
@@ -557,7 +573,7 @@ export default function App() {
                     return (
                       <div key={`input-diag-row-${key}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
                          <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name[0]}</div>
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name[0]}</div>
                             <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name}</span>
                          </div>
                          <CoachingTextarea value={managerComments[key]} onChange={(val) => setManagerComments(prev => ({...prev, [key]: val}))} placeholder={`Diagnostic & conseils pour ${name}...`} maxLength={500}/>
@@ -575,7 +591,7 @@ export default function App() {
         <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
           <div className="flex justify-between text-white mb-4 px-4 max-w-5xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
             <div className="flex items-center gap-3 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
               <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu Diagnostic Portrait A4</span>
             </div>
             <div className="flex items-center gap-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
