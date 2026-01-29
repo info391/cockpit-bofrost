@@ -317,7 +317,7 @@ const ReportLayout = ({ dataSummary, agencyAudit, analysisResults, agencyComment
                 </div>
               </div>
               <div className="p-6 bg-emerald-50/50 rounded-[1.5rem] border border-emerald-100 text-left text-left text-left">
-                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left">Directives Manager</div>
+                <div className="text-[8px] font-black text-emerald-600 uppercase mb-3 tracking-widest text-left text-left">Directives Manager</div>
                 <p className="text-xs font-bold text-emerald-950 italic leading-relaxed whitespace-pre-wrap text-left text-left">{managerComments[normKey] || "Saisissez vos conseils dans l'onglet coaching."}</p>
               </div>
             </div>
@@ -426,7 +426,7 @@ export default function App() {
       <aside className="w-64 bg-[#0033a0] text-white p-6 flex flex-col gap-8 print:hidden shrink-0 relative z-20 shadow-2xl text-left text-left">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white rounded-xl shadow-lg text-left text-left"><ShieldCheck style={{ color: '#0033a0' }} size={20} /></div>
-          <div className="text-left text-left text-left"><span className="font-black tracking-tighter uppercase text-sm block leading-none">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left text-left text-left">v60.14 Diagnostic</span></div>
+          <div className="text-left text-left text-left"><span className="font-black tracking-tighter uppercase text-sm block leading-none text-left">EM Executive</span><span className="text-[7px] text-blue-200 font-bold tracking-[0.2em] uppercase text-left text-left text-left">v60.15 Diagnostic</span></div>
         </div>
         <nav className="flex flex-col gap-1.5 text-left text-left text-left">
           <SidebarLink active={tab==='import'} onClick={() => setTab('import')} icon={<Database size={16}/>} label="Données Source" />
@@ -446,7 +446,7 @@ export default function App() {
           <div className="flex items-center gap-4 text-left">
             <h2 className="font-black uppercase tracking-tight italic text-sm text-[#0033a0] text-left text-left">Diagnostic du {today}</h2>
             <div className="h-6 w-px bg-slate-100 hidden md:block"></div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none text-left text-left">v60.14 Fix</span>
+            <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[9px] font-black uppercase italic tracking-widest leading-none text-left text-left">v60.15 Fix</span>
           </div>
           <div className="flex gap-2">
             {pastedData && <button onClick={() => {setPastedData(''); setAnalysisResults({});}} className="p-2 text-slate-400 hover:text-rose-500 transition-all text-left text-left"><Trash2 size={18}/></button>}
@@ -461,6 +461,13 @@ export default function App() {
                 <div className="flex items-center gap-3 mb-6 text-left text-left text-left text-left"><div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left"><ClipboardPaste size={24}/></div><h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left">Chargement Données Source</h3></div>
                 <textarea className="w-full h-80 p-6 bg-slate-50 border border-slate-200 rounded-[2rem] outline-none focus:border-[#0033a0] font-mono text-[11px] mb-8 text-left text-left text-left text-left text-left text-left" value={pastedData} onChange={(e)=>setPastedData(e.target.value)} placeholder="Collez votre tableau Google Sheet ici..."/>
                 
+                {dataSummary.count > 0 && (
+                  <div className="flex items-center gap-4 p-4 bg-blue-50 border border-blue-100 rounded-2xl mb-8 animate-in zoom-in duration-300">
+                    <div className="bg-white p-2 rounded-lg shadow-sm text-left"><Users style={{ color: '#0033a0' }} size={20} /></div>
+                    <div className="text-left text-left text-left text-left text-left text-left text-left"><p className="text-[10px] font-black text-[#0033a0] uppercase tracking-widest leading-none text-left text-left text-left text-left">Analyse nominative</p><p className="text-sm font-bold text-slate-700 mt-1">Le système a identifié <span className="text-[#0033a0] font-black">{dataSummary.count}</span> collaborateur(s) prêt(s) pour le diagnostic.</p></div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8 text-left text-left text-left text-left text-left">
                     <MultiSelectDropdown label="Filtrer par Mois" options={availableFilters.months} selected={selectedMonths} onToggle={(v)=>setSelectedMonths(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Filter}/>
                     <MultiSelectDropdown label="Filtrer par Semaine" options={availableFilters.weeks} selected={selectedWeeks} onToggle={(v)=>setSelectedWeeks(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])} icon={Calendar}/>
@@ -472,12 +479,12 @@ export default function App() {
 
           {tab === 'analyse' && (
             <div className="max-w-4xl mx-auto space-y-8 pb-20 animate-in fade-in duration-700 text-left text-left text-left text-left text-left">
-              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left text-left text-left text-left text-left">
+              <div className="bg-[#0033a0] rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden text-left text-left text-left text-left text-left text-left">
                 <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left text-left">
-                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left text-left text-left"><Building2 size={28}/></div>
-                  <div className="text-left text-left text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left text-left text-left">Bilan Diagnostic Agence</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left text-left text-left text-left text-left">Portrait de Performance ({dataSummary.range})</p></div>
+                  <div className="p-3 bg-white/10 rounded-2xl border border-white/20 text-left text-left text-left text-left"><Building2 size={28}/></div>
+                  <div className="text-left text-left text-left text-left text-left"><h3 className="text-2xl font-black uppercase tracking-tighter leading-none italic text-white text-left text-left text-left text-left">Bilan Diagnostic Agence</h3><p className="text-[9px] font-bold text-blue-200 uppercase tracking-[0.2em] mt-2 text-left text-left text-left text-left text-left text-left">Portrait de Performance ({dataSummary.range})</p></div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left text-left">
                   <StatBox label="Moy. Porte/Pres" value={dataSummary.agencyAvg.rPortePres} threshold={3} isAverage={true} icon={DoorOpen} />
                   <StatBox label="Moy. Pres/Prosp" value={dataSummary.agencyAvg.rPresProsp} threshold={2} isAverage={true} icon={UserSearch} />
                   <StatBox label="Moy. Prosp/Cl" value={dataSummary.agencyAvg.rProspClose} threshold={2} isAverage={true} icon={Handshake} />
@@ -485,9 +492,9 @@ export default function App() {
                   <StatBox label="Moy. BC / J" value={dataSummary.agencyAvg.valBC} threshold={12} isMax={false} isAverage={true} icon={PenTool} />
                   <StatBox label="Moy. Présence" value={dataSummary.agencyAvg.attendance} threshold={100} isMax={false} suffix="%" isAverage={true} icon={CalendarCheck} />
                 </div>
-                <div className="grid grid-cols-1 gap-4 text-left text-left">
+                <div className="grid grid-cols-1 gap-4 text-left text-left text-left">
                   <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-left text-left text-left text-left text-left">
-                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Automatique Complet</div>
+                    <div className="flex items-center gap-2 mb-4 text-blue-100 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Automatique Complet</div>
                     <div className="grid grid-cols-1 gap-4">
                       {agencyAudit.map((item, i) => {
                         const IconComp = item.icon;
@@ -496,7 +503,7 @@ export default function App() {
                              <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-400 text-emerald-900' : 'bg-rose-400 text-rose-900'}`}>
                                 {IconComp && <IconComp size={20} />}
                              </div>
-                             <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-bold leading-snug">{item.summary}</p><p className="text-[10px] opacity-80 mt-2 italic leading-relaxed">{item.numericalDetail}</p></div>
+                             <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-60 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-bold leading-snug text-left text-left">{item.summary}</p><p className="text-[10px] opacity-80 mt-2 italic leading-relaxed text-left text-left">{item.numericalDetail}</p></div>
                           </div>
                         );
                       })}
@@ -504,7 +511,7 @@ export default function App() {
                   </div>
                   <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-left text-left text-left text-left">
                      <div className="flex items-center gap-2 mb-4 text-emerald-200 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Agence</div>
-                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[150px] text-left">
+                     <div className="p-4 bg-white/5 rounded-2xl border border-white/10 min-h-[150px] text-left text-left text-left">
                         {agencyComment ? (
                            <p className="text-sm font-bold text-white italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left">{agencyComment}</p>
                         ) : (
@@ -518,8 +525,8 @@ export default function App() {
               {dataSummary.collabs.map((c) => (
                 <div key={`card-diag-col-${c.name}`} className={CARD_CLASS}>
                   <div className="flex items-center gap-4 mb-8 pb-4 border-b border-blue-50 text-left text-left text-left text-left text-left text-left">
-                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left text-left">{c.name[0]}</div>
-                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left">{c.name}</h3>
+                    <div className="w-14 h-14 rounded-2xl bg-[#0033a0] text-white flex items-center justify-center font-black text-2xl shadow-xl text-left text-left text-left text-left text-left text-left">{c.name[0]}</div>
+                    <h3 className="text-2xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left">{c.name}</h3>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 mb-8 text-left text-left text-left text-left text-left text-left">
                     <StatBox label="Porte / Pres" value={c.averages.rPortePres} threshold={3} icon={DoorOpen} />
@@ -529,9 +536,9 @@ export default function App() {
                     <StatBox label="BC / J" value={c.averages.valBC} threshold={12} isMax={false} icon={PenTool} />
                     <StatBox label="Présence" value={c.averages.attendance} threshold={100} isMax={false} suffix="%" icon={CalendarCheck} />
                   </div>
-                  <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner mb-6 text-left text-left text-left">
-                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif Complet</div>
-                      <div className="space-y-4">
+                  <div className="p-6 bg-blue-50/40 border border-blue-100 rounded-3xl shadow-inner mb-6 text-left text-left text-left text-left">
+                      <div className="flex items-center gap-2 mb-4 text-[#0033a0] font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><Activity size={14}/> Diagnostic Nominatif Complet</div>
+                      <div className="space-y-4 text-left text-left">
                         {(analysisResults[c.name] || []).map((item, i) => {
                           const IconC = item.icon;
                           return (
@@ -539,15 +546,15 @@ export default function App() {
                               <div className={`mt-1.5 p-2 rounded-lg shrink-0 ${item.met ? 'bg-emerald-500 text-white' : 'bg-rose-500 text-white'}`}>
                                  {IconC && <IconC size={20} />}
                               </div>
-                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-2 italic leading-relaxed text-left text-left text-left">{item.numericalDetail}</p></div>
+                              <div className="text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><span className="text-[8px] font-black uppercase opacity-40 block text-left text-left text-left text-left">{item.label}</span><p className="text-xs font-black leading-snug text-left text-left text-left text-left text-left">{item.summary}</p><p className="text-[10px] font-bold text-slate-500 mt-2 italic leading-relaxed text-left text-left text-left text-left">{item.numericalDetail}</p></div>
                             </div>
                           );
                         })}
                       </div>
                   </div>
                   <div className="p-6 bg-emerald-50/40 border border-emerald-100 rounded-3xl shadow-inner text-left text-left text-left text-left">
-                    <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager Nominatives</div>
-                    <p className="text-sm font-bold text-emerald-900 italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left">{managerComments[c.name.toLowerCase().replace(/\s/g, '')] || "Saisissez vos conseils dans l'onglet coaching."}</p>
+                    <div className="flex items-center gap-2 mb-3 text-emerald-700 font-black text-[10px] uppercase tracking-widest text-left text-left text-left text-left"><ThumbsUp size={14}/> Directives Manager Nominatives</div>
+                    <p className="text-sm font-bold text-emerald-900 italic leading-relaxed whitespace-pre-wrap text-left text-left text-left text-left text-left text-left">{managerComments[c.name.toLowerCase().replace(/\s/g, '')] || "Saisissez vos conseils dans l'onglet coaching."}</p>
                   </div>
                 </div>
               ))}
@@ -555,26 +562,26 @@ export default function App() {
           )}
 
           {tab === 'config' && (
-            <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left text-left text-left">
+            <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 text-left text-left text-left text-left text-left text-left text-left">
               <div className={CARD_CLASS}>
-                 <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
+                 <div className="flex items-center gap-4 mb-8 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                    <div className="p-3 bg-indigo-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Building2 size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-[#0033a0] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Directives Agence Globales</h3>
                  </div>
                  <CoachingTextarea label="Message global (Affiché Diagnostic Page 2)" value={agencyComment} onChange={setAgencyComment} placeholder="Objectifs globaux (850 chars max)..." maxLength={850}/>
               </div>
-              <div className="space-y-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
-                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Diagnostic & Coaching par Collaborateur</h3>
+              <div className="space-y-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                 <div className="flex items-center gap-4 mb-6 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                    <div className="p-3 bg-blue-50 text-[#0033a0] rounded-2xl text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><UserCog size={24}/></div>
+                    <h3 className="text-xl font-black uppercase tracking-tighter text-slate-900 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Diagnostic & Coaching par Collaborateur</h3>
                  </div>
                  {[...new Set(rawEntries.map(e => e.name))].map(name => {
                     const key = name.toLowerCase().replace(/\s/g, '');
                     return (
-                      <div key={`input-diag-row-${key}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                         <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name[0]}</div>
-                            <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name}</span>
+                      <div key={`input-diag-row-${key}`} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col md:flex-row gap-6 items-start text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                         <div className="flex items-center gap-4 min-w-[200px] text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+                            <div className="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-700 flex items-center justify-center font-black text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name[0]}</div>
+                            <span className="font-black uppercase text-slate-900 tracking-tight text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">{name}</span>
                          </div>
                          <CoachingTextarea value={managerComments[key]} onChange={(val) => setManagerComments(prev => ({...prev, [key]: val}))} placeholder={`Diagnostic & conseils pour ${name}...`} maxLength={500}/>
                       </div>
@@ -588,19 +595,19 @@ export default function App() {
 
       {/* MODAL APERÇU (Portrait A4 Standard) */}
       {showPdf && (
-        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-          <div className="flex justify-between text-white mb-4 px-4 max-w-5xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="flex items-center gap-3 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
-              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu Diagnostic Portrait A4</span>
+        <div className="fixed inset-0 z-[100] bg-blue-900/95 backdrop-blur-xl flex flex-col p-4 animate-in fade-in duration-300 overflow-hidden text-left print:hidden text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+          <div className="flex justify-between text-white mb-4 px-4 max-w-5xl mx-auto w-full text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+            <div className="flex items-center gap-3 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+              <div className="p-2 bg-white rounded-lg text-[#0033a0] shadow-lg text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><Printer size={20}/></div>
+              <span className="font-black uppercase tracking-widest italic text-xs text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Aperçu Diagnostic Portrait A4</span>
             </div>
-            <div className="flex items-center gap-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-               <button onClick={handlePrint} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Impression Système</button>
-               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
+            <div className="flex items-center gap-4 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+               <button onClick={handlePrint} className="px-6 py-3 bg-white text-[#0033a0] font-black rounded-xl flex items-center gap-2 shadow-2xl text-[10px] uppercase hover:bg-blue-50 transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">Impression Système</button>
+               <button onClick={()=>setShowPdf(false)} className="p-2 bg-white/10 rounded-full hover:bg-rose-50 text-white transition-all text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left"><X size={24}/></button>
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
-            <div className="bg-white shadow-2xl p-0 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left" style={{ width: A4_WIDTH }}>
+          <div className="flex-1 overflow-auto bg-slate-200/20 p-4 flex flex-col items-center text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left">
+            <div className="bg-white shadow-2xl p-0 text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left text-left" style={{ width: A4_WIDTH }}>
                <ReportLayout dataSummary={dataSummary} agencyAudit={agencyAudit} analysisResults={analysisResults} agencyComment={agencyComment} managerComments={managerComments} />
             </div>
           </div>
